@@ -1,0 +1,33 @@
+{
+  "name": "smart-attendance",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Smart Attendance monorepo launcher",
+  "scripts": {
+    "setup": "./setup.sh",
+    "up": "./up.sh",
+    "down": "./down.sh",
+    "start": "./start_all.sh",
+    "start:restart": "START_ALL_RESTART=true ./start_all.sh",
+    "stop": "./stop_all.sh",
+    "reset": "./reset.sh",
+    "status": "./status.sh",
+    "logs": "./logs.sh",
+    "mongo:start": "./start_mongodb.sh",
+    "mongo:stop": "./stop_mongodb.sh",
+    "mongo:doctor": "./mongo_doctor.sh",
+    "mongo:use-remote": "./use_remote_mongo.sh",
+    "mac:install-brew": "./install_homebrew_macos.sh",
+    "mac:fix-brew-path": "./fix_brew_path.sh",
+    "mac:install-mongo": "./install_mongodb_macos.sh",
+    "mac:bootstrap": "./bootstrap_macos.sh",
+    "smoke": "./smoke.sh",
+    "backend": "./start_backend.sh",
+    "frontend": "./start_frontend.sh",
+    "create-admin": "./create_admin.sh",
+    "doctor": "./doctor.sh",
+    "ready": "./ready.sh",
+    "py:setup": "./python_setup.sh",
+    "py:start": "./python_start.sh"
+  }
+}

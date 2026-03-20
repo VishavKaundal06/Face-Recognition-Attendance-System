@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Smart Attendance - Student</title>
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>📷 Smart Attendance System</h1>
+            <p>Face Recognition Based Attendance</p>
+        </header>
+
+        <main>
+            <!-- Navigation -->
+            <nav class="nav-tabs">
+                <button class="tab-btn active" data-tab="attendance">Mark Attendance</button>
+                <button class="tab-btn" data-tab="status">View Status</button>
+                <button class="tab-btn" data-tab="settings">Settings</button>
+            </nav>
+
+            <!-- Attendance Tab -->
+            <div id="attendance" class="tab-content active">
+                <div class="section">
+                    <h2>Mark Attendance</h2>
+                    
+                    <div class="video-container">
+                        <video id="video" autoplay playsinline></video>
+                        <canvas id="canvas" style="display: none;"></canvas>
+                    </div>
+
+                    <div class="controls">
+                        <button id="startBtn" class="btn btn-primary">Start Webcam</button>
+                        <button id="stopBtn" class="btn btn-secondary" disabled>Stop Webcam</button>
+                        <button id="captureBtn" class="btn btn-success" disabled>Capture & Mark</button>
+                    </div>
+
+                    <div id="faceDetection" class="detection-info">
+                        <p id="detectionStatus">Waiting for webcam...</p>
+                    </div>
+
+                    <div id="result" class="result-box" style="display: none;">
+                        <h3 id="resultTitle"></h3>
+                        <p id="resultMessage"></p>
+                        <div id="studentInfo" style="display: none;">
+                            <p><strong>Name:</strong> <span id="studentName"></span></p>
+                            <p><strong>Roll Number:</strong> <span id="studentRoll"></span></p>
+                            <p><strong>Confidence:</strong> <span id="confidence"></span>%</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Status Tab -->
+            <div id="status" class="tab-content">
+                <div class="section">
+                    <h2>Attendance Status</h2>
+                    <div class="settings-group" style="max-width: 520px; margin-bottom: 16px;">
+                        <label for="statusRollInput">Roll Number (optional):</label>
+                        <input type="text" id="statusRollInput" placeholder="e.g. CSE-101" class="input-field">
+                        <button id="refreshStatusBtn" class="btn btn-secondary" style="margin-top: 10px;">Refresh Status</button>
+                    </div>
+                    <div id="statusContent">
+                        <p>No records loaded yet.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Settings Tab -->
+            <div id="settings" class="tab-content">
+                <div class="section">
+                    <h2>Settings</h2>
+                    <div class="settings-group">
+                        <label for="apiUrl">API URL:</label>
+                        <input type="text" id="apiUrl" value="http://localhost:5050/api" class="input-field">
+                        
+                        <label for="threshold">Face Match Threshold:</label>
+                        <input type="number" id="threshold" min="0.3" max="1" step="0.1" value="0.6" class="input-field">
+
+                        <label for="autoMarkEnabled">Auto Mark Attendance:</label>
+                        <select id="autoMarkEnabled" class="input-field">
+                            <option value="false">Disabled</option>
+                            <option value="true">Enabled</option>
+                        </select>
+                        
+                        <button id="saveSettings" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 Smart Attendance System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <!-- Load face-api models -->
+    <script async defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="app.js"></script>
+</body>
+</html>

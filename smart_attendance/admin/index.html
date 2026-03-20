@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Smart Attendance</title>
+    <link rel="stylesheet" href="admin-styles.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <h2>🎓 Attendance</h2>
+                <p>Admin Panel</p>
+            </div>
+
+            <nav class="sidebar-nav">
+                <a href="#" class="nav-link active" data-section="dashboard">📊 Dashboard</a>
+                <a href="#" class="nav-link" data-section="students">👥 Students</a>
+                <a href="#" class="nav-link" data-section="attendance">📅 Attendance</a>
+                <a href="#" class="nav-link" data-section="register">📷 Register Student</a>
+                <a href="#" class="nav-link" data-section="reports">📈 Reports</a>
+                <a href="#" class="nav-link" data-section="settings">⚙️ Settings</a>
+            </nav>
+
+            <div class="sidebar-footer">
+                <button id="logoutBtn" class="btn-logout">Logout</button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <div id="offlineBanner" class="offline-banner" style="display: none;">
+                Backend is unreachable. Retrying connection...
+            </div>
+
+            <!-- Header -->
+            <header class="top-header">
+                <h1 id="pageTitle">Dashboard</h1>
+                <div class="header-right">
+                    <span id="userDisplay">Admin</span>
+                    <img src="https://via.placeholder.com/40" alt="User" class="user-avatar">
+                </div>
+            </header>
+
+            <!-- Content Areas -->
+            <div class="content-wrapper">
+                <!-- Dashboard Section -->
+                <section id="dashboard" class="content-section active">
+                    <div class="stats-grid">
+                        <div class="stat-card">
+                            <div class="stat-icon">👥</div>
+                            <h3>Total Students</h3>
+                            <p id="totalStudents">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">✅</div>
+                            <h3>Present Today</h3>
+                            <p id="presentToday">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">❌</div>
+                            <h3>Absent Today</h3>
+                            <p id="absentToday">0</p>
+                        </div>
+                        <div class="stat-card">
+                            <div class="stat-icon">⏰</div>
+                            <h3>Late Today</h3>
+                            <p id="lateToday">0</p>
+                        </div>
+                    </div>
+
+                    <div class="dashboard-grid">
+                        <div class="chart-card">
+                            <div class="health-header">
+                                <h3>System Health</h3>
+                                <button id="refreshHealthBtn" class="btn btn-secondary">Refresh</button>
+                            </div>
+                            <div class="health-grid">
+                                <div class="health-item">
+                                    <span class="health-label">Backend</span>
+                                    <span id="backendStatus" class="health-value unknown">Unknown</span>
+                                </div>
+                                <div class="health-item">
+                                    <span class="health-label">MongoDB</span>
+                                    <span id="mongoStatus" class="health-value unknown">Unknown</span>
+                                </div>
+                                <div class="health-item full-row">
+                                    <span class="health-label">Last Checked</span>
+                                    <span id="healthLastChecked" class="health-value">-</span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="chart-card">
+                            <h3>Today's Attendance Status</h3>
+                            <canvas id="attendanceChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Recent Attendance Records</h3>
+                            <table class="table">
+                                <thead>
+                                    <tr>
+                                        <th>Name</th>
+                                        <th>Roll No</th>
+                                        <th>Time</th>
+                                        <th>Status</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="recentAttendance">
+                                    <tr>
+                                        <td colspan="4">Loading...</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Students Section -->
+                <section id="students" class="content-section">
+                    <div class="section-header">
+                        <h2>Student Management</h2>
+                        <input type="text" id="searchStudent" placeholder="Search by name or roll number..." class="search-input">
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Roll Number</th>
+                                <th>Email</th>
+                                <th>Department</th>
+                                <th>Semester</th>
+                                <th>Face Registered</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="studentsList">
+                            <tr>
+                                <td colspan="7">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Attendance Section -->
+                <section id="attendance" class="content-section">
+                    <div class="section-header">
+                        <h2>Attendance Records</h2>
+                        <div class="filter-controls">
+                            <input type="date" id="filterDate" class="input-field">
+                            <select id="filterStatus" class="input-field">
+                                <option value="">All Status</option>
+                                <option value="present">Present</option>
+                                <option value="absent">Absent</option>
+                                <option value="late">Late</option>
+                            </select>
+                            <button id="exportBtn" class="btn btn-primary">📥 Export CSV</button>
+                        </div>
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Student Name</th>
+                                <th>Roll Number</th>
+                                <th>Date</th>
+                                <th>Time In</th>
+                                <th>Status</th>
+                                <th>Confidence</th>
+                            </tr>
+                        </thead>
+                        <tbody id="attendanceList">
+                            <tr>
+                                <td colspan="6">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Register Section -->
+                <section id="register" class="content-section">
+                    <h2>Register New Student</h2>
+                    
+                    <div class="register-form">
+                        <div class="form-group">
+                            <label>Student Details</label>
+                            <input type="text" id="regName" placeholder="Full Name" class="input-field">
+                            <input type="text" id="regRoll" placeholder="Roll Number" class="input-field">
+                            <input type="email" id="regEmail" placeholder="Email" class="input-field">
+                            <select id="regDept" class="input-field">
+                                <option value="" selected>Select Department</option>
+                                <option value="CSE">Computer Science Engineering</option>
+                                <option value="ECE">Electronics & Communication</option>
+                                <option value="ME">Mechanical Engineering</option>
+                                <option value="CE">Civil Engineering</option>
+                            </select>
+                            <select id="regSem" class="input-field">
+                                <option value="" selected>Select Semester</option>
+                                <option value="1">1st Semester</option>
+                                <option value="2">2nd Semester</option>
+                                <option value="3">3rd Semester</option>
+                                <option value="4">4th Semester</option>
+                                <option value="5">5th Semester</option>
+                                <option value="6">6th Semester</option>
+                            </select>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Capture Face</label>
+                            <div class="video-container-admin">
+                                <video id="registerVideo" autoplay playsinline></video>
+                                <canvas id="registerCanvas" style="display: none;"></canvas>
+                            </div>
+                            <div class="controls">
+                                <button id="regStartBtn" class="btn btn-secondary">Start Camera</button>
+                                <button id="regCaptureBtn" class="btn btn-success" disabled>Capture Face</button>
+                                <button id="regStopBtn" class="btn btn-secondary" disabled>Stop Camera</button>
+                            </div>
+                            <p id="regStatus" class="status-text">Ready to register</p>
+                        </div>
+
+                        <button id="submitRegBtn" class="btn btn-primary btn-large">Submit Registration</button>
+                    </div>
+                </section>
+
+                <!-- Reports Section -->
+                <section id="reports" class="content-section">
+                    <h2>Reports</h2>
+                    
+                    <div class="reports-grid">
+                        <div class="report-card">
+                            <h3>Attendance Summary</h3>
+                            <div class="form-group">
+                                <label>Select Date Range:</label>
+                                <input type="date" id="reportStart" class="input-field">
+                                <input type="date" id="reportEnd" class="input-field">
+                                <button id="generateReport" class="btn btn-primary">Generate Report</button>
+                                <button id="exportReportBtn" class="btn btn-secondary" type="button">Export Report CSV</button>
+                            </div>
+                            <div id="reportContent"></div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Settings Section -->
+                <section id="settings" class="content-section">
+                    <h2>Settings</h2>
+                    
+                    <div class="settings-form">
+                        <div class="form-group">
+                            <label for="settingsApiUrl">API URL:</label>
+                            <input type="text" id="settingsApiUrl" class="input-field">
+                        </div>
+                        <div class="form-group">
+                            <label for="settingsThreshold">Face Match Threshold:</label>
+                            <input type="number" id="settingsThreshold" min="0.3" max="1" step="0.1" class="input-field">
+                        </div>
+                        <button id="saveSettingsBtn" class="btn btn-primary">Save Settings</button>
+                    </div>
+                </section>
+            </div>
+        </main>
+    </div>
+
+    <div id="editStudentModal" class="modal-overlay" style="display: none;">
+        <div class="modal-card">
+            <div class="modal-header">
+                <h3>Edit Student</h3>
+                <button id="closeEditModalBtn" class="modal-close" type="button">×</button>
+            </div>
+            <div class="modal-body">
+                <input type="hidden" id="editStudentId">
+                <input id="editName" type="text" class="input-field" placeholder="Full Name">
+                <input id="editEmail" type="email" class="input-field" placeholder="Email">
+                <input id="editDepartment" type="text" class="input-field" placeholder="Department">
+                <input id="editSemester" type="number" min="1" max="12" class="input-field" placeholder="Semester">
+            </div>
+            <div class="modal-actions">
+                <button id="cancelEditBtn" class="btn btn-secondary" type="button">Cancel</button>
+                <button id="saveEditBtn" class="btn btn-primary" type="button">Save Changes</button>
+            </div>
+            <p id="editError" class="modal-error"></p>
+        </div>
+    </div>
+
+    <script async defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script src="admin-app.js"></script>
+</body>
+</html>
