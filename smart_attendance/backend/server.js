@@ -1,4 +1,6 @@
-require('dotenv').config({ path: require('path').resolve(__dirname, '.env') });
+require('dotenv').config({ path: require('path').resolve(__dirname, '.env'), override: true });
+const fs = require('fs');
+const path = require('path');
 const express = require('express');
 const cors = require('cors');
 const helmet = require('helmet');
@@ -12,6 +14,40 @@ const studentRoutes = require('./routes/students');
 const attendanceRoutes = require('./routes/attendance');
 
 const app = express();
+
+const pidDir = path.resolve(__dirname, '..', '.pids');
+const pidFile = path.join(pidDir, 'backend.pid');
+
+function writePidFile() {
+  try {
+    fs.mkdirSync(pidDir, { recursive: true });
+    fs.writeFileSync(pidFile, String(process.pid), 'utf8');
+  } catch (e) {
+    console.warn(`Warning: failed to write PID file (${pidFile}): ${e.message}`);
+  }
+}
+
+function cleanupPidFile() {
+  try {
+    if (!fs.existsSync(pidFile)) return;
+    const raw = fs.readFileSync(pidFile, 'utf8').trim();
+    if (raw === String(process.pid)) {
+      fs.rmSync(pidFile, { force: true });
+    }
+  } catch {
+    // ignore
+  }
+}
+
+process.on('exit', cleanupPidFile);
+process.on('SIGINT', () => {
+  cleanupPidFile();
+  process.exit(0);
+});
+process.on('SIGTERM', () => {
+  cleanupPidFile();
+  process.exit(0);
+});
 
 mongoose.set('bufferCommands', false);
 
@@ -100,6 +136,7 @@ app.use((err, req, res, next) => {
 const PORT = process.env.PORT || 5050;
 
 app.listen(PORT, () => {
+  writePidFile();
   console.log(`🚀 Server running on port ${PORT}`);
   console.log(`Environment: ${process.env.NODE_ENV}`);
 });
