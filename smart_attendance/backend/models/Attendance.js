@@ -46,6 +46,24 @@ const AttendanceSchema = new mongoose.Schema(
       type: String,
       required: false,
     },
+    subject: {
+      type: String,
+      required: false,
+    },
+    timetableId: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: 'Timetable',
+      required: false,
+    },
+
+    deviceInfo: {
+      type: Object,
+      default: {},
+    },
+    location: {
+      type: Object,
+      default: {},
+    },
   },
   { timestamps: true }
 );
@@ -54,4 +72,13 @@ const AttendanceSchema = new mongoose.Schema(
 AttendanceSchema.index({ studentId: 1, date: 1 });
 AttendanceSchema.index({ date: 1 });
 
-module.exports = mongoose.model('Attendance', AttendanceSchema);
+const AttendanceModel = mongoose.model('Attendance', AttendanceSchema);
+
+// Export mock model if DB is unavailable and allowed
+const useMock = process.env.ALLOW_START_WITHOUT_DB === 'true' && mongoose.connection.readyState !== 1;
+if (useMock) {
+    console.warn('Using MockAttendance model for in-memory storage.');
+    module.exports = require('../utils/mockModels').MockAttendance;
+} else {
+    module.exports = AttendanceModel;
+}

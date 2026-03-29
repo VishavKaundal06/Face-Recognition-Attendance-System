@@ -1,27 +1,13 @@
-// Middleware setup
-module.exports = {
-  authenticateToken: (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
+// Global error-handling middleware
+const errorHandler = (err, req, res, _next) => {
+  console.error(err.stack || err.message || err);
 
-    if (!token) {
-      return res.status(401).json({
-        success: false,
-        error: 'Access token required',
-      });
-    }
+  const statusCode = err.statusCode || 500;
 
-    const jwt = require('jsonwebtoken');
-    jwt.verify(token, process.env.JWT_SECRET, (err, user) => {
-      if (err) {
-        return res.status(403).json({
-          success: false,
-          error: 'Invalid or expired token',
-        });
-      }
-
-      req.user = user;
-      next();
-    });
-  },
+  res.status(statusCode).json({
+    success: false,
+    error: process.env.NODE_ENV === 'production' ? 'Internal server error' : err.message || 'Internal server error',
+  });
 };
+
+module.exports = { errorHandler };

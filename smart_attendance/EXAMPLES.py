@@ -1,5 +1,5 @@
 """
-Example Usage Scenarios for Smart Attendance System
+Example Usage Scenarios for HPTU Attendance System
 """
 
 # Example 1: Register a new person

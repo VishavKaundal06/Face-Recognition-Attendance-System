@@ -3,7 +3,7 @@ set -euo pipefail
 
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 
-echo "Smart Attendance macOS Bootstrap"
+echo "HPTU Attendance System macOS Bootstrap"
 echo "-------------------------------"
 
 if ! xcode-select -p >/dev/null 2>&1; then

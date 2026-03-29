@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BASE_URL="${SMOKE_BASE_URL:-http://localhost:5050/api}"
 
-echo "Smart Attendance Smoke Test"
+echo "HPTU Attendance System Smoke Test"
 echo "Base URL: $BASE_URL"
 
 echo "1) Health check..."

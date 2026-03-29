@@ -3,15 +3,17 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Dashboard - Smart Attendance</title>
+    <title>Admin Dashboard - HPTU Attendance System</title>
     <link rel="stylesheet" href="admin-styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
 </head>
 <body>
     <div class="admin-container">
         <!-- Sidebar -->
         <aside class="sidebar">
             <div class="logo">
-                <h2>🎓 Attendance</h2>
+                <h2>🎓 HPTU Attendance</h2>
                 <p>Admin Panel</p>
             </div>
 
@@ -19,7 +21,10 @@
                 <a href="#" class="nav-link active" data-section="dashboard">📊 Dashboard</a>
                 <a href="#" class="nav-link" data-section="students">👥 Students</a>
                 <a href="#" class="nav-link" data-section="attendance">📅 Attendance</a>
-                <a href="#" class="nav-link" data-section="register">📷 Register Student</a>
+                <a href="#" class="nav-link" data-section="register">Register Student</a>
+                <a href="#" class="nav-link" data-section="corrections">📝 Corrections</a>
+                <a href="#" class="nav-link" data-section="holidays">📌 Holidays</a>
+                <a href="#" class="nav-link" data-section="audit">📋 Audit Logs</a>
                 <a href="#" class="nav-link" data-section="reports">📈 Reports</a>
                 <a href="#" class="nav-link" data-section="settings">⚙️ Settings</a>
             </nav>
@@ -98,6 +103,201 @@
                             <canvas id="attendanceChart"></canvas>
                         </div>
                         <div class="chart-card">
+                            <h3>Last 7 Days Trend</h3>
+                            <canvas id="trendsChart"></canvas>
+                        </div>
+                        <div class="chart-card">
+                            <h3>Branch Distribution</h3>
+                            <canvas id="branchChart"></canvas>
+                        </div>
+
+                        <div class="chart-card calendar-card">
+                            <h3>2026 Calendar</h3>
+                            <div class="calendar-year">
+                                <div class="month">
+                                    <h4>January</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td></td><td></td><td></td><td></td><td>1</td><td>2</td><td>3</td></tr>
+                                            <tr><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>
+                                            <tr><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td></tr>
+                                            <tr><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td></tr>
+                                            <tr><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>February</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+                                            <tr><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td></tr>
+                                            <tr><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td></tr>
+                                            <tr><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>March</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+                                            <tr><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td></tr>
+                                            <tr><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td></tr>
+                                            <tr><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td></tr>
+                                            <tr><td>29</td><td>30</td><td>31</td><td></td><td></td><td></td><td></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>April</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td></td><td></td><td></td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+                                            <tr><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
+                                            <tr><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
+                                            <tr><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td></tr>
+                                            <tr><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td></td><td></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>May</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td></td><td></td><td></td><td></td><td></td><td>1</td><td>2</td></tr>
+                                            <tr><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td></tr>
+                                            <tr><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td></tr>
+                                            <tr><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td></tr>
+                                            <tr><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td></tr>
+                                            <tr><td>31</td><td></td><td></td><td></td><td></td><td></td><td></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>June</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td></tr>
+                                            <tr><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td></tr>
+                                            <tr><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td></tr>
+                                            <tr><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td></tr>
+                                            <tr><td>28</td><td>29</td><td>30</td><td></td><td></td><td></td><td></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>July</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td></td><td></td><td></td><td>1</td><td>2</td><td>3</td><td>4</td></tr>
+                                            <tr><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td></tr>
+                                            <tr><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td></tr>
+                                            <tr><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td></tr>
+                                            <tr><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td><td></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>August</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td></td><td></td><td></td><td></td><td></td><td></td><td>1</td></tr>
+                                            <tr><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td></tr>
+                                            <tr><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td></tr>
+                                            <tr><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td></tr>
+                                            <tr><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td></tr>
+                                            <tr><td>30</td><td>31</td><td></td><td></td><td></td><td></td><td></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>September</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td></td><td></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+                                            <tr><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
+                                            <tr><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td></tr>
+                                            <tr><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+                                            <tr><td>27</td><td>28</td><td>29</td><td>30</td><td></td><td></td><td></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>October</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td></td><td></td><td></td><td></td><td>1</td><td>2</td><td>3</td></tr>
+                                            <tr><td>4</td><td>5</td><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td></tr>
+                                            <tr><td>11</td><td>12</td><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td></tr>
+                                            <tr><td>18</td><td>19</td><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td></tr>
+                                            <tr><td>25</td><td>26</td><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>November</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td><td>6</td><td>7</td></tr>
+                                            <tr><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td><td>13</td><td>14</td></tr>
+                                            <tr><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td><td>20</td><td>21</td></tr>
+                                            <tr><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td><td>27</td><td>28</td></tr>
+                                            <tr><td>29</td><td>30</td><td></td><td></td><td></td><td></td><td></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                                <div class="month">
+                                    <h4>December</h4>
+                                    <table class="calendar-table">
+                                        <thead>
+                                            <tr><th>Su</th><th>Mo</th><th>Tu</th><th>We</th><th>Th</th><th>Fr</th><th>Sa</th></tr>
+                                        </thead>
+                                        <tbody>
+                                            <tr><td></td><td></td><td>1</td><td>2</td><td>3</td><td>4</td><td>5</td></tr>
+                                            <tr><td>6</td><td>7</td><td>8</td><td>9</td><td>10</td><td>11</td><td>12</td></tr>
+                                            <tr><td>13</td><td>14</td><td>15</td><td>16</td><td>17</td><td>18</td><td>19</td></tr>
+                                            <tr><td>20</td><td>21</td><td>22</td><td>23</td><td>24</td><td>25</td><td>26</td></tr>
+                                            <tr><td>27</td><td>28</td><td>29</td><td>30</td><td>31</td><td></td><td></td></tr>
+                                        </tbody>
+                                    </table>
+                                </div>
+                            </div>
+                        </div>
+                        <div class="chart-card">
                             <h3>Recent Attendance Records</h3>
                             <table class="table">
                                 <thead>
@@ -125,21 +325,123 @@
                         <input type="text" id="searchStudent" placeholder="Search by name or roll number..." class="search-input">
                     </div>
 
+                    <div class="filter-controls" style="margin-bottom: 16px; flex-wrap: wrap;">
+                        <input type="file" id="studentCsvFile" accept=".csv" class="input-field" style="max-width: 260px;">
+                        <button id="importStudentsBtn" class="btn btn-primary">Import CSV</button>
+                        <span id="importStatus" style="font-size: 0.9rem; color: #546e7a;"></span>
+                    </div>
+
                     <table class="table">
                         <thead>
                             <tr>
                                 <th>Name</th>
                                 <th>Roll Number</th>
                                 <th>Email</th>
-                                <th>Department</th>
-                                <th>Semester</th>
+                                <th>Phone</th>
+                                <th>Branch</th>
+                                <th>Year</th>
                                 <th>Face Registered</th>
                                 <th>Actions</th>
                             </tr>
                         </thead>
                         <tbody id="studentsList">
                             <tr>
+                                <td colspan="8">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Corrections Section -->
+                <section id="corrections" class="content-section">
+                    <div class="section-header">
+                        <h2>Attendance Corrections</h2>
+                        <select id="correctionFilter" class="input-field">
+                            <option value="pending">Pending</option>
+                            <option value="approved">Approved</option>
+                            <option value="rejected">Rejected</option>
+                        </select>
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Student</th>
+                                <th>Roll Number</th>
+                                <th>Date</th>
+                                <th>Requested Status</th>
+                                <th>Reason</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="correctionsList">
+                            <tr>
                                 <td colspan="7">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Holidays Section -->
+                <section id="holidays" class="content-section">
+                    <div class="section-header">
+                        <h2>Holiday / Leave Calendar</h2>
+                    </div>
+
+                    <div class="register-form" style="margin-bottom: 20px;">
+                        <div class="form-group">
+                            <label>Add Holiday or Leave</label>
+                            <input type="text" id="holidayTitle" placeholder="Title" class="input-field">
+                            <input type="date" id="holidayDate" class="input-field">
+                            <select id="holidayType" class="input-field">
+                                <option value="holiday">Holiday</option>
+                                <option value="leave">Leave</option>
+                            </select>
+                            <input type="text" id="holidayDescription" placeholder="Description (optional)" class="input-field">
+                            <button id="addHolidayBtn" class="btn btn-primary" type="button">Add</button>
+                            <p id="holidayStatus" class="status-text" style="margin-top: 10px;">No holiday added.</p>
+                        </div>
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Date</th>
+                                <th>Title</th>
+                                <th>Type</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="holidaysList">
+                            <tr>
+                                <td colspan="5">Loading...</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </section>
+
+                <!-- Audit Logs Section -->
+                <section id="audit" class="content-section">
+                    <div class="section-header">
+                        <h2>Audit Logs</h2>
+                        <button id="refreshAuditBtn" class="btn btn-secondary" type="button">Refresh</button>
+                    </div>
+
+                    <table class="table">
+                        <thead>
+                            <tr>
+                                <th>Time</th>
+                                <th>Actor Role</th>
+                                <th>Action</th>
+                                <th>Entity</th>
+                                <th>Metadata</th>
+                            </tr>
+                        </thead>
+                        <tbody id="auditLogs">
+                            <tr>
+                                <td colspan="5">Loading...</td>
                             </tr>
                         </tbody>
                     </table>
@@ -190,21 +492,21 @@
                             <input type="text" id="regName" placeholder="Full Name" class="input-field">
                             <input type="text" id="regRoll" placeholder="Roll Number" class="input-field">
                             <input type="email" id="regEmail" placeholder="Email" class="input-field">
-                            <select id="regDept" class="input-field">
-                                <option value="" selected>Select Department</option>
-                                <option value="CSE">Computer Science Engineering</option>
-                                <option value="ECE">Electronics & Communication</option>
-                                <option value="ME">Mechanical Engineering</option>
-                                <option value="CE">Civil Engineering</option>
+                            <input type="tel" id="regPhone" placeholder="Phone Number" class="input-field">
+                            <select id="regCourse" class="input-field" style="margin-bottom: 10px;">
+                                <option value="" selected disabled>Select Course</option>
+                                <option value="B.Tech">B.Tech</option>
+                                <option value="M.Tech">M.Tech</option>
+                                <option value="MCA">MCA</option>
+                                <option value="MBA">MBA</option>
+                                <option value="IHM">IHM</option>
+                                <option value="M.Sc">M.Sc</option>
                             </select>
-                            <select id="regSem" class="input-field">
-                                <option value="" selected>Select Semester</option>
-                                <option value="1">1st Semester</option>
-                                <option value="2">2nd Semester</option>
-                                <option value="3">3rd Semester</option>
-                                <option value="4">4th Semester</option>
-                                <option value="5">5th Semester</option>
-                                <option value="6">6th Semester</option>
+                            <select id="regBranch" class="input-field">
+                                <option value="" selected>Select Branch</option>
+                            </select>
+                            <select id="regYear" class="input-field" style="margin-top: 10px;">
+                                <option value="" selected disabled>Select Semester</option>
                             </select>
                         </div>
 
@@ -237,6 +539,11 @@
                                 <label>Select Date Range:</label>
                                 <input type="date" id="reportStart" class="input-field">
                                 <input type="date" id="reportEnd" class="input-field">
+                                <div class="controls" style="justify-content: flex-start; margin-top: 10px;">
+                                    <button id="reportTodayBtn" class="btn btn-secondary" type="button">Today</button>
+                                    <button id="reportWeekBtn" class="btn btn-secondary" type="button">This Week</button>
+                                    <button id="reportMonthBtn" class="btn btn-secondary" type="button">This Month</button>
+                                </div>
                                 <button id="generateReport" class="btn btn-primary">Generate Report</button>
                                 <button id="exportReportBtn" class="btn btn-secondary" type="button">Export Report CSV</button>
                             </div>
@@ -275,8 +582,10 @@
                 <input type="hidden" id="editStudentId">
                 <input id="editName" type="text" class="input-field" placeholder="Full Name">
                 <input id="editEmail" type="email" class="input-field" placeholder="Email">
-                <input id="editDepartment" type="text" class="input-field" placeholder="Department">
-                <input id="editSemester" type="number" min="1" max="12" class="input-field" placeholder="Semester">
+                <input id="editPhone" type="tel" class="input-field" placeholder="Phone Number">
+                <input id="editCourse" type="text" class="input-field" placeholder="Course">
+                <input id="editBranch" type="text" class="input-field" placeholder="Branch">
+                <input id="editYear" type="number" min="1" max="8" class="input-field" placeholder="Year">
             </div>
             <div class="modal-actions">
                 <button id="cancelEditBtn" class="btn btn-secondary" type="button">Cancel</button>
@@ -286,7 +595,7 @@
         </div>
     </div>
 
-    <script async defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <script src="admin-app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script defer src="admin-app.js"></script>
 </body>
 </html>

@@ -2,7 +2,7 @@
   "name": "smart-attendance",
   "version": "1.0.0",
   "private": true,
-  "description": "Smart Attendance monorepo launcher",
+  "description": "HPTU Attendance System monorepo launcher",
   "scripts": {
     "setup": "./setup.sh",
     "up": "./up.sh",

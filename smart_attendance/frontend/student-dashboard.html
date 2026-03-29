@@ -1,0 +1,83 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Dashboard - HPTU Attendance</title>
+    <link rel="stylesheet" href="styles.css">
+    <link rel="stylesheet" href="student-styles.css">
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>My Attendance Portal</h1>
+            <p id="studentInfoDisplay">Welcome, Student</p>
+            <div style="margin-top: 12px;">
+                <button id="logoutBtn" class="btn btn-secondary">Logout</button>
+            </div>
+        </header>
+
+        <main>
+            <nav class="nav-tabs">
+                <button class="tab-btn active" data-tab="overview">Overview</button>
+                <button class="tab-btn" data-tab="timetable">Timetable</button>
+                <button class="tab-btn" data-tab="history">History</button>
+                <button class="tab-btn" data-tab="leave">Apply Leave</button>
+            </nav>
+
+            <!-- Overview Tab -->
+            <div id="overview" class="tab-content active">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <h3>Overall Attendance</h3>
+                        <p id="overallPercentage">0%</p>
+                    </div>
+                </div>
+                <div class="section">
+                    <h2>Recent Classes</h2>
+                    <div id="recentClasses">
+                        <p>No recent classes found.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Timetable Tab -->
+            <div id="timetable" class="tab-content">
+                <div class="section">
+                    <h2>Weekly Timetable</h2>
+                    <div id="timetableContent" class="timetable-grid">
+                        <p>Loading timetable...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- History Tab -->
+            <div id="history" class="tab-content">
+                <div class="section">
+                    <h2>Full History</h2>
+                    <div id="historyContent">
+                        <p>Loading history...</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Leave Tab -->
+            <div id="leave" class="tab-content">
+                <div class="section">
+                    <h2>Apply for Leave</h2>
+                    <div class="settings-group">
+                        <label>Reason</label>
+                        <textarea id="leaveReason" class="input-field" rows="3"></textarea>
+                        <label>Start Date</label>
+                        <input type="date" id="leaveStart" class="input-field">
+                        <label>End Date</label>
+                        <input type="date" id="leaveEnd" class="input-field">
+                        <button id="submitLeave" class="btn btn-primary">Submit Request</button>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+    <script src="student-dashboard.js"></script>
+</body>
+</html>

@@ -1,37 +1,50 @@
 const Attendance = require('../models/Attendance');
 const Student = require('../models/Student');
+const Timetable = require('../models/Timetable');
+const CorrectionRequest = require('../models/CorrectionRequest');
+const { logAudit } = require('../utils/audit');
 
 // Mark attendance
 exports.markAttendance = async (req, res) => {
   try {
-    const { studentId, status = 'present', confidence, photo, remarks } = req.body;
+    const { studentId, status = 'present', confidence, photo, remarks, deviceInfo, location } = req.body;
 
-    // Check if student exists
     const student = await Student.findById(studentId);
     if (!student) {
-      return res.status(404).json({
-        success: false,
-        error: 'Student not found',
-      });
+      return res.status(404).json({ success: false, error: 'Student not found' });
     }
 
-    // Check if already marked today
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
+    // Determine current subject based on Timetable
+    const now = new Date();
+    const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+    const currentDay = days[now.getDay()];
+    const currentTime = `${String(now.getHours()).padStart(2, '0')}:${String(now.getMinutes()).padStart(2, '0')}`;
+
+    const activeSlot = await Timetable.findOne({
+      dayOfWeek: currentDay,
+      course: student.course,
+      branch: student.branch,
+      startTime: { $lte: currentTime },
+      endTime: { $gte: currentTime }
+    });
+
+    // Check if already marked for this SPECIFIC slot today
+    const startOfDay = new Date();
+    startOfDay.setHours(0, 0, 0, 0);
 
     const alreadyMarked = await Attendance.findOne({
       studentId,
-      date: {
-        $gte: today,
-        $lt: new Date(today.getTime() + 24 * 60 * 60 * 1000),
-      },
+      date: { $gte: startOfDay },
+      $or: [
+        { timetableId: activeSlot?._id },
+        { subject: activeSlot?.subject }
+      ]
     });
 
-    if (alreadyMarked) {
+    if (alreadyMarked && activeSlot) {
       return res.status(400).json({
         success: false,
-        error: 'Attendance already marked for today',
-        data: alreadyMarked,
+        error: `Attendance already marked for ${activeSlot.subject} today`,
       });
     }
 
@@ -39,20 +52,149 @@ exports.markAttendance = async (req, res) => {
       studentId,
       studentName: student.name,
       rollNumber: student.rollNumber,
-      date: today,
-      timeIn: new Date(),
-      status,
+      date: startOfDay,
+      timeIn: now,
+      status: status,
       confidence,
       photo,
       remarks,
+      deviceInfo,
+      location,
+      subject: activeSlot?.subject || 'General',
+      timetableId: activeSlot?._id
     });
 
     await attendance.save();
+
+    await logAudit({
+      req,
+      action: 'attendance.marked',
+      entityType: 'attendance',
+      entityId: attendance._id,
+      metadata: { studentId: student._id, status },
+    });
 
     res.status(201).json({
       success: true,
       data: attendance,
       message: 'Attendance marked successfully',
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+// Create correction request
+exports.createCorrectionRequest = async (req, res) => {
+  try {
+    const { attendanceId, reason, requestedStatus } = req.body;
+
+    const attendance = await Attendance.findById(attendanceId);
+    if (!attendance) {
+      return res.status(404).json({
+        success: false,
+        error: 'Attendance record not found',
+      });
+    }
+
+    const request = await CorrectionRequest.create({
+      attendanceId,
+      requestedBy: req.user.userId,
+      reason,
+      requestedStatus,
+    });
+
+    await logAudit({
+      req,
+      action: 'correction.requested',
+      entityType: 'correction',
+      entityId: request._id,
+      metadata: { attendanceId, requestedStatus },
+    });
+
+    res.status(201).json({
+      success: true,
+      data: request,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+// List correction requests
+exports.listCorrectionRequests = async (req, res) => {
+  try {
+    const { status = 'pending' } = req.query;
+    const filter = status ? { status } : {};
+
+    const requests = await CorrectionRequest.find(filter)
+      .sort({ createdAt: -1 })
+      .populate('attendanceId')
+      .populate('requestedBy', 'username email role')
+      .populate('reviewedBy', 'username email role');
+
+    res.json({
+      success: true,
+      data: requests,
+    });
+  } catch (error) {
+    res.status(500).json({
+      success: false,
+      error: error.message,
+    });
+  }
+};
+
+// Review correction request
+exports.reviewCorrectionRequest = async (req, res) => {
+  try {
+    const { id } = req.params;
+    const { status, reviewNote } = req.body;
+
+    const request = await CorrectionRequest.findById(id);
+    if (!request) {
+      return res.status(404).json({
+        success: false,
+        error: 'Correction request not found',
+      });
+    }
+
+    if (request.status !== 'pending') {
+      return res.status(400).json({
+        success: false,
+        error: 'Request already reviewed',
+      });
+    }
+
+    request.status = status;
+    request.reviewNote = reviewNote;
+    request.reviewedBy = req.user.userId;
+    request.reviewedAt = new Date();
+    await request.save();
+
+    if (status === 'approved') {
+      await Attendance.findByIdAndUpdate(request.attendanceId, {
+        status: request.requestedStatus,
+      });
+    }
+
+    await logAudit({
+      req,
+      action: 'correction.reviewed',
+      entityType: 'correction',
+      entityId: request._id,
+      metadata: { status },
+    });
+
+    res.json({
+      success: true,
+      data: request,
     });
   } catch (error) {
     res.status(500).json({

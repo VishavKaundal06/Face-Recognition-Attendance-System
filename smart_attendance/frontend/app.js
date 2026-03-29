@@ -2,8 +2,11 @@
 const CONFIG = {
   API_URL: localStorage.getItem('apiUrl') || 'http://localhost:5050/api',
   THRESHOLD: parseFloat(localStorage.getItem('threshold')) || 0.6,
-  MODEL_URL: 'https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights/',
+  MODEL_URL: 'https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/',
   AUTO_MARK: localStorage.getItem('autoMarkEnabled') === 'true',
+  MULTI_FRAME: localStorage.getItem('multiFrameEnabled') !== 'false',
+  LIVENESS: localStorage.getItem('livenessEnabled') === 'true',
+  LOCATION: localStorage.getItem('locationEnabled') === 'true',
 };
 
 // DOM Elements
@@ -22,6 +25,10 @@ const tabContents = document.querySelectorAll('.tab-content');
 const statusContent = document.getElementById('statusContent');
 const refreshStatusBtn = document.getElementById('refreshStatusBtn');
 const statusRollInput = document.getElementById('statusRollInput');
+const multiFrameEnabledEl = document.getElementById('multiFrameEnabled');
+const livenessEnabledEl = document.getElementById('livenessEnabled');
+const locationEnabledEl = document.getElementById('locationEnabled');
+const toggleThemeBtn = document.getElementById('toggleTheme');
 
 let stream = null;
 let detectionInterval = null;
@@ -45,6 +52,7 @@ tabBtns.forEach((btn) => {
     }
   });
 });
+
 
 function renderStatusRows(records) {
   if (!records.length) {
@@ -109,6 +117,20 @@ async function loadAttendanceStatus() {
 
 refreshStatusBtn?.addEventListener('click', loadAttendanceStatus);
 
+function applyTheme() {
+  const isDark = localStorage.getItem('theme') === 'dark';
+  document.body.classList.toggle('dark-mode', isDark);
+  if (toggleThemeBtn) {
+    toggleThemeBtn.textContent = isDark ? 'Light Mode' : 'Dark Mode';
+  }
+}
+
+toggleThemeBtn?.addEventListener('click', () => {
+  const current = localStorage.getItem('theme') === 'dark' ? 'light' : 'dark';
+  localStorage.setItem('theme', current);
+  applyTheme();
+});
+
 // Load face-api models
 async function loadModels() {
   try {
@@ -125,6 +147,7 @@ async function loadModels() {
     detectionStatus.textContent = '✗ Error loading models. Check console.';
   }
 }
+
 
 // Start webcam
 startBtn.addEventListener('click', async () => {
@@ -170,7 +193,7 @@ function startFaceDetection() {
       const detection = await faceapi
         .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
         .withFaceLandmarks()
-        .withFaceDescriptors();
+        .withFaceDescriptor();
 
       if (detection) {
         detectionStatus.textContent = `✓ Face detected (${(detection.detection.score * 100).toFixed(1)}% confidence)`;
@@ -194,22 +217,20 @@ function startFaceDetection() {
 // Capture and mark attendance
 captureBtn.addEventListener('click', async () => {
   try {
-    // Draw video frame to canvas
-    const ctx = canvas.getContext('2d');
-    canvas.width = video.videoWidth;
-    canvas.height = video.videoHeight;
-    ctx.drawImage(video, 0, 0);
-
-    // Detect face and get descriptor
-    const detection = await faceapi
-      .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
-      .withFaceLandmarks()
-      .withFaceDescriptors();
-
+    const detection = await captureMultiFrameDetection();
     if (!detection) {
-      showResult('error', 'No Face Detected', 'Please position your face properly in the camera.');
       return;
     }
+
+    if (CONFIG.LIVENESS) {
+      const passed = await runLivenessChallenge();
+      if (!passed) {
+        showResult('error', 'Liveness Check Failed', 'Verification challenge not completed in time.');
+        detectionStatus.textContent = '✗ Liveness check failed';
+        return;
+      }
+    }
+
 
     await markAttendanceFromDetection(detection, { autoMode: false });
   } catch (error) {
@@ -218,6 +239,139 @@ captureBtn.addEventListener('click', async () => {
     captureBtn.disabled = false;
   }
 });
+
+async function captureMultiFrameDetection() {
+  const ctx = canvas.getContext('2d');
+  const framesRequired = CONFIG.MULTI_FRAME ? 3 : 1;
+  let lastDetection = null;
+
+  for (let i = 0; i < framesRequired; i += 1) {
+    canvas.width = video.videoWidth;
+    canvas.height = video.videoHeight;
+    ctx.drawImage(video, 0, 0);
+
+    const detection = await faceapi
+      .detectSingleFace(canvas, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks()
+      .withFaceDescriptor();
+
+    if (!detection) {
+      showResult('error', 'No Face Detected', 'Please position your face properly in the camera.');
+      return null;
+    }
+
+    lastDetection = detection;
+    if (framesRequired > 1) {
+      await new Promise((resolve) => setTimeout(resolve, 250));
+    }
+  }
+
+  return lastDetection;
+}
+
+function eyeAspectRatio(eye) {
+  const dist = (a, b) => Math.hypot(a.x - b.x, a.y - b.y);
+  const A = dist(eye[1], eye[5]);
+  const B = dist(eye[2], eye[4]);
+  const C = dist(eye[0], eye[3]);
+  return (A + B) / (2.0 * C);
+}
+
+async function runLivenessChallenge() {
+  const challenges = [
+    { type: 'blink', label: 'Please Blink' },
+    { type: 'left', label: 'Turn Head Left' },
+    { type: 'right', label: 'Turn Head Right' }
+  ];
+  
+  const challenge = challenges[Math.floor(Math.random() * challenges.length)];
+  detectionStatus.innerHTML = `<span style="color: #ff9800; font-weight: bold; font-size: 1.2rem;">Challenge: ${challenge.label}</span>`;
+  
+  const start = Date.now();
+  let success = false;
+  let eyeClosedFrames = 0;
+
+  while (Date.now() - start < 4000) {
+    const detection = await faceapi
+      .detectSingleFace(video, new faceapi.TinyFaceDetectorOptions())
+      .withFaceLandmarks();
+
+    if (detection?.landmarks) {
+      if (challenge.type === 'blink') {
+        const leftEye = detection.landmarks.getLeftEye();
+        const rightEye = detection.landmarks.getRightEye();
+        const ear = (eyeAspectRatio(leftEye) + eyeAspectRatio(rightEye)) / 2;
+        if (ear < 0.2) eyeClosedFrames += 1;
+        else if (eyeClosedFrames >= 2) { success = true; break; }
+      } else if (challenge.type === 'left') {
+        const nose = detection.landmarks.getNose();
+        const jaw = detection.landmarks.getJawOutline();
+        // Simple heuristic: nose closer to left side of jaw than right
+        const distLeft = Math.abs(nose[0].x - jaw[0].x);
+        const distRight = Math.abs(nose[0].x - jaw[16].x);
+        if (distLeft < distRight * 0.5) { success = true; break; }
+      } else if (challenge.type === 'right') {
+        const nose = detection.landmarks.getNose();
+        const jaw = detection.landmarks.getJawOutline();
+        const distLeft = Math.abs(nose[0].x - jaw[0].x);
+        const distRight = Math.abs(nose[0].x - jaw[16].x);
+        if (distRight < distLeft * 0.5) { success = true; break; }
+      }
+    }
+    await new Promise((resolve) => setTimeout(resolve, 100));
+  }
+
+  return success;
+}
+
+// IndexedDB Utility for Offline Storage
+const DB_NAME = 'AttendanceDB';
+const STORE_NAME = 'pendingAttendance';
+
+async function openDB() {
+  return new Promise((resolve, reject) => {
+    const request = indexedDB.open(DB_NAME, 1);
+    request.onupgradeneeded = (e) => {
+      e.target.result.createObjectStore(STORE_NAME, { keyPath: 'id', autoIncrement: true });
+    };
+    request.onsuccess = () => resolve(request.result);
+    request.onerror = () => reject(request.error);
+  });
+}
+
+async function saveOfflineAttendance(data) {
+  const db = await openDB();
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  tx.objectStore(STORE_NAME).add({ ...data, timestamp: Date.now() });
+}
+
+async function syncOfflineAttendance() {
+  if (!navigator.onLine) return;
+  const db = await openDB();
+  const tx = db.transaction(STORE_NAME, 'readwrite');
+  const store = tx.objectStore(STORE_NAME);
+  const records = await new Promise((resolve) => {
+    const req = store.getAll();
+    req.onsuccess = () => resolve(req.result);
+  });
+
+  for (const record of records) {
+    try {
+      const response = await fetch(`${CONFIG.API_URL}/attendance/mark`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(record)
+      });
+      if (response.ok) {
+        db.transaction(STORE_NAME, 'readwrite').objectStore(STORE_NAME).delete(record.id);
+      }
+    } catch (e) {
+      console.error('Failed to sync record:', e);
+    }
+  }
+}
+
+window.addEventListener('online', syncOfflineAttendance);
 
 async function markAttendanceFromDetection(detection, { autoMode = false } = {}) {
   if (markInProgress) return;
@@ -229,9 +383,7 @@ async function markAttendanceFromDetection(detection, { autoMode = false } = {})
     canvas.height = video.videoHeight;
     ctx.drawImage(video, 0, 0);
 
-    if (!autoMode) {
-      captureBtn.disabled = true;
-    }
+    if (!autoMode) captureBtn.disabled = true;
 
     detectionStatus.textContent = autoMode
       ? '⏳ Auto-marking attendance...'
@@ -240,9 +392,7 @@ async function markAttendanceFromDetection(detection, { autoMode = false } = {})
     // Send face descriptor to backend for recognition
     const response = await fetch(`${CONFIG.API_URL}/students/recognize`, {
       method: 'POST',
-      headers: {
-        'Content-Type': 'application/json',
-      },
+      headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         faceDescriptor: Array.from(detection.descriptor),
         threshold: CONFIG.THRESHOLD,
@@ -251,70 +401,47 @@ async function markAttendanceFromDetection(detection, { autoMode = false } = {})
 
     const data = await response.json();
 
-    if (response.status === 503) {
-      showResult('error', 'Service Unavailable', 'Database is unavailable. Please try again later.');
-      detectionStatus.textContent = '✗ Backend running without database';
-      return;
-    }
-
     if (data.success && data.matched) {
-      // Mark attendance
-      const attendanceResponse = await fetch(`${CONFIG.API_URL}/attendance/mark`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-          studentId: data.student.id,
-          status: 'present',
-          confidence: Math.round(data.confidence * 100),
-          photo: canvas.toDataURL('image/jpeg'),
-        }),
-      });
+      const payload = {
+        studentId: data.student.id,
+        status: 'present',
+        confidence: Math.round(data.confidence * 100),
+        photo: canvas.toDataURL('image/jpeg'),
+        deviceInfo: { userAgent: navigator.userAgent, platform: navigator.platform },
+        location: await getLocationPayload(),
+      };
 
-      const attendanceData = await attendanceResponse.json();
+      try {
+        const attendanceResponse = await fetch(`${CONFIG.API_URL}/attendance/mark`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload),
+        });
 
-      if (attendanceResponse.status === 503) {
-        showResult('error', 'Service Unavailable', 'Database is unavailable. Cannot mark attendance right now.');
-        detectionStatus.textContent = '✗ Backend running without database';
-      } else if (attendanceData.success) {
-        showResult(
-          'success',
-          '✓ Attendance Marked!',
-          autoMode ? `Auto-marked: ${data.student.name}` : `Welcome, ${data.student.name}`
-        );
-        
-        // Show student info
-        document.getElementById('studentName').textContent = data.student.name;
-        document.getElementById('studentRoll').textContent = data.student.rollNumber;
-        document.getElementById('confidence').textContent = Math.round(data.confidence * 100);
-        studentInfo.style.display = 'block';
+        const attendanceData = await attendanceResponse.json();
 
-        detectionStatus.textContent = '✓ Attendance marked successfully!';
-      } else {
-        if (!autoMode || attendanceData.error !== 'Attendance already marked for today') {
-          showResult('error', 'Attendance Error', attendanceData.error || 'Failed to mark attendance');
+        if (attendanceData.success) {
+          showResult('success', '✓ Attendance Marked!', `Welcome, ${data.student.name}`);
+        } else {
+          showResult('error', 'Attendance Error', attendanceData.error);
         }
-        detectionStatus.textContent = '✗ Error: ' + (attendanceData.error || 'Unknown error');
+      } catch (networkError) {
+        console.warn('Network error, saving offline:', networkError);
+        await saveOfflineAttendance(payload);
+        showResult('success', '☁️ Offline Attendance Saved', `Network unavailable. ${data.student.name}'s attendance will sync later.`);
       }
     } else {
-      if (!autoMode) {
-        showResult('error', 'Face Not Recognized', 'Please register first or try again.');
-      }
-      detectionStatus.textContent = '✗ Face not recognized. Distance: ' + data.bestDistance?.toFixed(3);
+      if (!autoMode) showResult('error', 'Face Not Recognized', 'Please register first or try again.');
     }
   } catch (error) {
     console.error('Error:', error);
-    if (!autoMode) {
-      showResult('error', 'Error', error.message);
-    }
+    if (!autoMode) showResult('error', 'Error', error.message);
   } finally {
-    if (!autoMode) {
-      captureBtn.disabled = false;
-    }
+    if (!autoMode) captureBtn.disabled = false;
     markInProgress = false;
   }
 }
+
 
 // Show result message
 function showResult(type, title, message) {
@@ -330,14 +457,23 @@ document.getElementById('saveSettings').addEventListener('click', () => {
   const apiUrl = document.getElementById('apiUrl').value;
   const threshold = document.getElementById('threshold').value;
   const autoMarkEnabled = document.getElementById('autoMarkEnabled').value;
+  const multiFrameEnabled = document.getElementById('multiFrameEnabled').value;
+  const livenessEnabled = document.getElementById('livenessEnabled').value;
+  const locationEnabled = document.getElementById('locationEnabled').value;
 
   localStorage.setItem('apiUrl', apiUrl);
   localStorage.setItem('threshold', threshold);
   localStorage.setItem('autoMarkEnabled', autoMarkEnabled);
+  localStorage.setItem('multiFrameEnabled', multiFrameEnabled);
+  localStorage.setItem('livenessEnabled', livenessEnabled);
+  localStorage.setItem('locationEnabled', locationEnabled);
 
   CONFIG.API_URL = apiUrl;
   CONFIG.THRESHOLD = parseFloat(threshold);
   CONFIG.AUTO_MARK = autoMarkEnabled === 'true';
+  CONFIG.MULTI_FRAME = multiFrameEnabled !== 'false';
+  CONFIG.LIVENESS = livenessEnabled === 'true';
+  CONFIG.LOCATION = locationEnabled === 'true';
 
   alert('✓ Settings saved!');
 });
@@ -346,6 +482,36 @@ document.getElementById('saveSettings').addEventListener('click', () => {
 document.getElementById('apiUrl').value = CONFIG.API_URL;
 document.getElementById('threshold').value = CONFIG.THRESHOLD;
 document.getElementById('autoMarkEnabled').value = String(CONFIG.AUTO_MARK);
+if (multiFrameEnabledEl) multiFrameEnabledEl.value = String(CONFIG.MULTI_FRAME);
+if (livenessEnabledEl) livenessEnabledEl.value = String(CONFIG.LIVENESS);
+if (locationEnabledEl) locationEnabledEl.value = String(CONFIG.LOCATION);
 
-// Initialize
-loadModels();
+async function getLocationPayload() {
+  if (!CONFIG.LOCATION || !navigator.geolocation) {
+    return {};
+  }
+
+  return new Promise((resolve) => {
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        resolve({
+          latitude: pos.coords.latitude,
+          longitude: pos.coords.longitude,
+          accuracy: pos.coords.accuracy,
+        });
+      },
+      () => resolve({}),
+      { enableHighAccuracy: false, timeout: 4000 }
+    );
+  });
+}
+
+// Register Service Worker for PWA
+if ('serviceWorker' in navigator) {
+  window.addEventListener('load', () => {
+    navigator.serviceWorker.register('/sw.js')
+      .then(reg => console.log('SW Registered', reg))
+      .catch(err => console.log('SW Registration Failed', err));
+  });
+}
+

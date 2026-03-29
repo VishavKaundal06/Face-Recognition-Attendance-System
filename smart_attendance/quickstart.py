@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-Quick Start Script - Smart Attendance System
+Quick Start Script - HPTU Attendance System
 Run this script to quickly set up and test the system
 """
 
@@ -83,7 +83,7 @@ def main():
     py_cmd = Path(sys.executable).name or "python3"
 
     print("="*50)
-    print("SMART ATTENDANCE SYSTEM - QUICK START")
+    print("HPTU ATTENDANCE SYSTEM - QUICK START")
     print("="*50 + "\n")
     
     # Check if we're in the right directory

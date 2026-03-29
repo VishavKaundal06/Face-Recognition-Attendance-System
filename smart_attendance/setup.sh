@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKEND_DIR="$ROOT_DIR/backend"
 
-echo "Smart Attendance Setup"
+echo "HPTU Attendance System Setup"
 echo "----------------------"
 
 if ! command -v node >/dev/null 2>&1; then

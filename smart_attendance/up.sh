@@ -23,7 +23,7 @@ is_local_mongo_uri() {
 
 cd "$ROOT_DIR"
 
-echo "Starting Smart Attendance stack..."
+echo "Starting HPTU Attendance System stack..."
 
 MONGO_URI="$(get_env_value "MONGO_URI" "$BACKEND_ENV" || true)"
 ALLOW_START_WITHOUT_DB="$(get_env_value "ALLOW_START_WITHOUT_DB" "$BACKEND_ENV" || true)"

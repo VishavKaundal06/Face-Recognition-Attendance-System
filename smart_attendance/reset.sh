@@ -5,7 +5,7 @@ ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 PID_DIR="$ROOT_DIR/.pids"
 LOG_DIR="$ROOT_DIR/logs"
 
-echo "Resetting Smart Attendance runtime state..."
+echo "Resetting HPTU Attendance System runtime state..."
 
 if [ -x "$ROOT_DIR/stop_all.sh" ]; then
   "$ROOT_DIR/stop_all.sh" || true

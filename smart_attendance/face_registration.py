@@ -41,7 +41,10 @@ class FaceRegistration:
             # Mirror the frame
             frame = cv2.flip(frame, 1)
             
-            # Add instructions
+            # Keep a clean copy before drawing UI text (for saving)
+            clean_frame = frame.copy()
+            
+            # Add instructions (drawn on display frame only)
             cv2.putText(frame, f"Captured: {captured}/{num_samples}", (10, 30),
                        cv2.FONT_HERSHEY_SIMPLEX, 1, (0, 255, 0), 2)
             cv2.putText(frame, "Press SPACE to capture, Q to quit", (10, 70),
@@ -53,7 +56,7 @@ class FaceRegistration:
             
             if key == ord(' '):  # SPACE key
                 image_path = os.path.join(person_dir, f"{name}_{captured}.jpg")
-                cv2.imwrite(image_path, frame)
+                cv2.imwrite(image_path, clean_frame)
                 print(f"✓ Captured {captured + 1}/{num_samples}")
                 captured += 1
             

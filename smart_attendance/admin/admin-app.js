@@ -27,9 +27,24 @@ const editModal = document.getElementById('editStudentModal');
 const editStudentIdEl = document.getElementById('editStudentId');
 const editNameEl = document.getElementById('editName');
 const editEmailEl = document.getElementById('editEmail');
-const editDepartmentEl = document.getElementById('editDepartment');
-const editSemesterEl = document.getElementById('editSemester');
+const editPhoneEl = document.getElementById('editPhone');
+const editBranchEl = document.getElementById('editBranch');
+const editYearEl = document.getElementById('editYear');
 const editErrorEl = document.getElementById('editError');
+const studentCsvFileEl = document.getElementById('studentCsvFile');
+const importStudentsBtn = document.getElementById('importStudentsBtn');
+const importStatusEl = document.getElementById('importStatus');
+const correctionsListEl = document.getElementById('correctionsList');
+const correctionFilterEl = document.getElementById('correctionFilter');
+const holidayTitleEl = document.getElementById('holidayTitle');
+const holidayDateEl = document.getElementById('holidayDate');
+const holidayTypeEl = document.getElementById('holidayType');
+const holidayDescriptionEl = document.getElementById('holidayDescription');
+const addHolidayBtn = document.getElementById('addHolidayBtn');
+const holidayStatusEl = document.getElementById('holidayStatus');
+const holidaysListEl = document.getElementById('holidaysList');
+const auditLogsEl = document.getElementById('auditLogs');
+const refreshAuditBtn = document.getElementById('refreshAuditBtn');
 
 function showOfflineBanner(message = 'Backend is unreachable. Retrying connection...') {
   if (!offlineBanner) return;
@@ -57,53 +72,76 @@ function scheduleHealthRetry() {
   healthRetryDelayMs = Math.min(healthRetryDelayMs * 2, 60000);
 }
 
+let charts = {};
+
 function renderAttendanceChart({ present = 0, absent = 0, late = 0, leave = 0 } = {}) {
   const canvas = document.getElementById('attendanceChart');
   if (!canvas) return;
 
-  const ctx = canvas.getContext('2d');
-  const width = 380;
-  const height = 220;
-  canvas.width = width;
-  canvas.height = height;
+  if (charts.attendance) {
+    charts.attendance.destroy();
+  }
 
-  ctx.clearRect(0, 0, width, height);
+  charts.attendance = new Chart(canvas, {
+    type: 'pie',
+    data: {
+      labels: ['Present', 'Absent', 'Late', 'Leave'],
+      datasets: [{
+        data: [present, absent, late, leave],
+        backgroundColor: ['#4CAF50', '#f44336', '#ff9800', '#2196f3']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+}
 
-  const data = [
-    { label: 'Present', value: present, color: '#4CAF50' },
-    { label: 'Absent', value: absent, color: '#f44336' },
-    { label: 'Late', value: late, color: '#ff9800' },
-    { label: 'Leave', value: leave, color: '#2196f3' },
-  ];
+function renderTrendsChart(trends) {
+  const canvas = document.getElementById('trendsChart');
+  if (!canvas) return;
 
-  const maxValue = Math.max(1, ...data.map((d) => d.value));
-  const chartLeft = 40;
-  const chartBottom = 180;
-  const chartHeight = 130;
-  const barWidth = 55;
-  const barGap = 25;
+  if (charts.trends) charts.trends.destroy();
 
-  ctx.strokeStyle = '#d9d9d9';
-  ctx.lineWidth = 1;
-  ctx.beginPath();
-  ctx.moveTo(chartLeft, 20);
-  ctx.lineTo(chartLeft, chartBottom);
-  ctx.lineTo(width - 20, chartBottom);
-  ctx.stroke();
+  charts.trends = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels: trends.map(t => t._id),
+      datasets: [{
+        label: 'Attendance Count',
+        data: trends.map(t => t.count),
+        borderColor: '#2196f3',
+        tension: 0.1,
+        fill: false
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
+  });
+}
 
-  data.forEach((item, index) => {
-    const x = chartLeft + 20 + index * (barWidth + barGap);
-    const barHeight = (item.value / maxValue) * chartHeight;
-    const y = chartBottom - barHeight;
+function renderBranchChart(stats) {
+  const canvas = document.getElementById('branchChart');
+  if (!canvas) return;
 
-    ctx.fillStyle = item.color;
-    ctx.fillRect(x, y, barWidth, barHeight);
+  if (charts.branch) charts.branch.destroy();
 
-    ctx.fillStyle = '#333';
-    ctx.font = '12px Arial';
-    ctx.textAlign = 'center';
-    ctx.fillText(String(item.value), x + barWidth / 2, y - 6);
-    ctx.fillText(item.label, x + barWidth / 2, chartBottom + 16);
+  charts.branch = new Chart(canvas, {
+    type: 'doughnut',
+    data: {
+      labels: stats.map(s => `${s._id.branch} (${s._id.course})`),
+      datasets: [{
+        data: stats.map(s => s.totalStudents),
+        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+      }]
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false
+    }
   });
 }
 
@@ -179,20 +217,63 @@ sidebarLinks.forEach((link) => {
       loadStudents();
     } else if (section === 'attendance') {
       loadAttendance();
+    } else if (section === 'corrections') {
+      loadCorrections();
+    } else if (section === 'holidays') {
+      loadHolidays();
+    } else if (section === 'audit') {
+      loadAuditLogs();
     } else if (section === 'dashboard') {
       loadDashboard();
     }
   });
 });
 
+async function importStudentsCsv() {
+  if (!studentCsvFileEl?.files?.length) {
+    if (importStatusEl) importStatusEl.textContent = 'Select a CSV file first.';
+    return;
+  }
+
+  if (importStatusEl) importStatusEl.textContent = 'Importing...';
+  importStudentsBtn.disabled = true;
+
+  try {
+    const formData = new FormData();
+    formData.append('file', studentCsvFileEl.files[0]);
+
+    const response = await apiRequest('/students/import', {
+      method: 'POST',
+      body: formData,
+    });
+
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Import failed');
+    }
+
+    const summary = data.data || {};
+    if (importStatusEl) {
+      importStatusEl.textContent = `Imported: ${summary.created || 0}, Skipped: ${summary.skipped || 0}`;
+    }
+    await loadStudents();
+  } catch (error) {
+    if (importStatusEl) importStatusEl.textContent = `Import failed: ${error.message}`;
+  } finally {
+    importStudentsBtn.disabled = false;
+  }
+}
+
+importStudentsBtn?.addEventListener('click', importStudentsCsv);
+
 // Load models
 async function loadModels() {
   try {
     console.log('Loading face-api models...');
     await Promise.all([
-      faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights/'),
-      faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights/'),
-      faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/weights/'),
+      faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/'),
+      faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/'),
+      faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/'),
     ]);
     console.log('✓ Models loaded');
   } catch (error) {
@@ -216,17 +297,17 @@ async function loadDashboard() {
 
     // Get stats
     const today = new Date().toISOString().split('T')[0];
-    const statsResponse = await apiRequest(`/attendance/stats/summary?startDate=${today}&endDate=${today}`);
-    const statsData = await statsResponse.json();
+    const summaryStatsResponse = await apiRequest(`/attendance/stats/summary?startDate=${today}&endDate=${today}`);
+    const summaryStatsData = await summaryStatsResponse.json();
 
-    if (statsData.success) {
-      const present = statsData.data.totalPresent || 0;
-      const late = statsData.data.totalLate || 0;
-      const leave = statsData.data.totalLeave || 0;
+    if (summaryStatsData.success) {
+      const present = summaryStatsData.data.totalPresent || 0;
+      const late = summaryStatsData.data.totalLate || 0;
+      const leave = summaryStatsData.data.totalLeave || 0;
 
       // Since absences are usually implicit in attendance systems, derive it by default.
       const derivedAbsent = Math.max(0, totalStudents - (present + late + leave));
-      const recordedAbsent = statsData.data.totalAbsent || 0;
+      const recordedAbsent = summaryStatsData.data.totalAbsent || 0;
       const absent = Math.max(derivedAbsent, recordedAbsent);
 
       document.getElementById('presentToday').textContent = present;
@@ -235,6 +316,15 @@ async function loadDashboard() {
 
       renderAttendanceChart({ present, absent, late, leave });
     }
+
+    // Load Analytics
+    const trendsResponse = await apiRequest('/analytics/trends');
+    const trendsData = await trendsResponse.json();
+    if (trendsData.success) renderTrendsChart(trendsData.data);
+
+    const branchStatsResponse = await apiRequest('/analytics/class-stats');
+    const branchStatsData = await branchStatsResponse.json();
+    if (branchStatsData.success) renderBranchChart(branchStatsData.data);
 
     // Get recent attendance
     const todayResponse = await apiRequest(`/attendance/date/${new Date().toISOString().split('T')[0]}`);
@@ -335,7 +425,7 @@ function renderStudents(students) {
   if (!tbody) return;
 
   if (!students.length) {
-    tbody.innerHTML = '<tr><td colspan="7">No students found</td></tr>';
+    tbody.innerHTML = '<tr><td colspan="8">No students found</td></tr>';
     return;
   }
 
@@ -346,8 +436,9 @@ function renderStudents(students) {
           <td>${student.name}</td>
           <td>${student.rollNumber}</td>
           <td>${student.email}</td>
-          <td>${student.department}</td>
-          <td>${student.semester}</td>
+          <td>${student.phone || '-'}</td>
+          <td>${student.branch || student.department || '-'}</td>
+          <td>${student.year || student.semester || '-'}</td>
           <td>${student.hasFace ? '✓' : '✗'}</td>
           <td>
             <button class="btn-edit" onclick="editStudent('${student._id}')">Edit</button>
@@ -380,8 +471,10 @@ function editStudent(id) {
   editStudentIdEl.value = student._id;
   editNameEl.value = student.name || '';
   editEmailEl.value = student.email || '';
-  editDepartmentEl.value = student.department || '';
-  editSemesterEl.value = student.semester || '';
+  if (editPhoneEl) editPhoneEl.value = student.phone || '';
+  if (document.getElementById('editCourse')) document.getElementById('editCourse').value = student.course || '';
+  if (editBranchEl) editBranchEl.value = student.branch || student.department || '';
+  if (editYearEl) editYearEl.value = student.year || student.semester || '';
   if (editErrorEl) editErrorEl.textContent = '';
 
   openEditModal();
@@ -392,11 +485,20 @@ async function saveEditedStudent() {
   const payload = {
     name: editNameEl.value.trim(),
     email: editEmailEl.value.trim(),
-    department: editDepartmentEl.value.trim(),
-    semester: parseInt(editSemesterEl.value, 10),
+    phone: editPhoneEl?.value.trim(),
+    course: document.getElementById('editCourse')?.value.trim(),
+    branch: editBranchEl?.value.trim(),
+    year: editYearEl?.value ? parseInt(editYearEl.value, 10) : undefined,
   };
 
-  if (!payload.name || !payload.email || !payload.department || !payload.semester) {
+  if (payload.branch) {
+    payload.department = payload.branch;
+  }
+  if (payload.year) {
+    payload.semester = payload.year;
+  }
+
+  if (!payload.name || !payload.email || !payload.phone || !payload.course || !payload.branch || !payload.year) {
     editErrorEl.textContent = 'All fields are required.';
     return;
   }
@@ -406,8 +508,8 @@ async function saveEditedStudent() {
     return;
   }
 
-  if (payload.semester < 1 || payload.semester > 12) {
-    editErrorEl.textContent = 'Semester must be between 1 and 12.';
+  if (payload.year < 1 || payload.year > 8) {
+    editErrorEl.textContent = 'Year must be between 1 and 8.';
     return;
   }
 
@@ -586,6 +688,14 @@ async function loadAttendance() {
     }
   } catch (error) {
     console.error('Error loading attendance:', error);
+    const tbody = document.getElementById('attendanceList');
+    if (tbody) {
+      tbody.innerHTML = `
+        <tr>
+          <td colspan="6">Failed to load status: Database unavailable. Attendance status is temporarily unavailable. Example Roll No: 72547364737</td>
+        </tr>
+      `;
+    }
   }
 }
 
@@ -608,6 +718,197 @@ document.getElementById('searchStudent')?.addEventListener('input', (event) => {
 
   renderStudents(filtered);
 });
+
+// ========== CORRECTIONS ==========
+async function loadCorrections() {
+  if (!correctionsListEl) return;
+  const status = correctionFilterEl?.value || 'pending';
+  correctionsListEl.innerHTML = '<tr><td colspan="7">Loading...</td></tr>';
+
+  try {
+    const response = await apiRequest(`/attendance/corrections?status=${status}`);
+    const data = await response.json();
+
+    if (!data.success) {
+      throw new Error(data.error || 'Failed to load corrections');
+    }
+
+    const rows = (data.data || []).map((req) => {
+      const attendance = req.attendanceId || {};
+      const studentName = attendance.studentName || '-';
+      const rollNumber = attendance.rollNumber || '-';
+      const date = attendance.date ? new Date(attendance.date).toLocaleDateString() : '-';
+      const actions = req.status === 'pending'
+        ? `
+          <button class="btn-edit" onclick="reviewCorrection('${req._id}', 'approved')">Approve</button>
+          <button class="btn-delete" onclick="reviewCorrection('${req._id}', 'rejected')">Reject</button>
+        `
+        : '-';
+
+      return `
+        <tr>
+          <td>${studentName}</td>
+          <td>${rollNumber}</td>
+          <td>${date}</td>
+          <td>${req.requestedStatus}</td>
+          <td>${req.reason || '-'}</td>
+          <td>${req.status}</td>
+          <td>${actions}</td>
+        </tr>
+      `;
+    });
+
+    correctionsListEl.innerHTML = rows.length
+      ? rows.join('')
+      : '<tr><td colspan="7">No correction requests</td></tr>';
+  } catch (error) {
+    correctionsListEl.innerHTML = `<tr><td colspan="7">${error.message}</td></tr>`;
+  }
+}
+
+async function reviewCorrection(id, status) {
+  const reviewNote = prompt('Add a review note (optional):') || '';
+  try {
+    const response = await apiRequest(`/attendance/corrections/${id}`, {
+      method: 'PATCH',
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: JSON.stringify({ status, reviewNote }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to update request');
+    }
+    await loadCorrections();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+correctionFilterEl?.addEventListener('change', loadCorrections);
+
+// ========== HOLIDAYS ==========
+async function loadHolidays() {
+  if (!holidaysListEl) return;
+  holidaysListEl.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+
+  try {
+    const response = await apiRequest('/calendar/holidays');
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to load holidays');
+    }
+
+    const rows = (data.data || []).map((holiday) => {
+      return `
+        <tr>
+          <td>${new Date(holiday.date).toLocaleDateString()}</td>
+          <td>${holiday.title}</td>
+          <td>${holiday.type}</td>
+          <td>${holiday.description || '-'}</td>
+          <td>
+            <button class="btn-delete" onclick="deleteHoliday('${holiday._id}')">Delete</button>
+          </td>
+        </tr>
+      `;
+    });
+
+    holidaysListEl.innerHTML = rows.length
+      ? rows.join('')
+      : '<tr><td colspan="5">No holidays added</td></tr>';
+  } catch (error) {
+    holidaysListEl.innerHTML = `<tr><td colspan="5">${error.message}</td></tr>`;
+  }
+}
+
+async function addHoliday() {
+  const title = holidayTitleEl?.value.trim();
+  const date = holidayDateEl?.value;
+  const type = holidayTypeEl?.value || 'holiday';
+  const description = holidayDescriptionEl?.value.trim();
+
+  if (!title || !date) {
+    if (holidayStatusEl) holidayStatusEl.textContent = 'Title and date are required.';
+    return;
+  }
+
+  addHolidayBtn.disabled = true;
+  if (holidayStatusEl) holidayStatusEl.textContent = 'Saving...';
+
+  try {
+    const response = await apiRequest('/calendar/holidays', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, date, type, description }),
+    });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to add holiday');
+    }
+
+    if (holidayStatusEl) holidayStatusEl.textContent = 'Holiday added.';
+    holidayTitleEl.value = '';
+    holidayDateEl.value = '';
+    holidayDescriptionEl.value = '';
+    await loadHolidays();
+  } catch (error) {
+    if (holidayStatusEl) holidayStatusEl.textContent = error.message;
+  } finally {
+    addHolidayBtn.disabled = false;
+  }
+}
+
+async function deleteHoliday(id) {
+  if (!confirm('Delete this holiday?')) return;
+  try {
+    const response = await apiRequest(`/calendar/holidays/${id}`, { method: 'DELETE' });
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to delete holiday');
+    }
+    await loadHolidays();
+  } catch (error) {
+    alert(error.message);
+  }
+}
+
+addHolidayBtn?.addEventListener('click', addHoliday);
+
+// ========== AUDIT LOGS ==========
+async function loadAuditLogs() {
+  if (!auditLogsEl) return;
+  auditLogsEl.innerHTML = '<tr><td colspan="5">Loading...</td></tr>';
+
+  try {
+    const response = await apiRequest('/audit/logs?limit=100');
+    const data = await response.json();
+    if (!response.ok || !data.success) {
+      throw new Error(data.error || 'Failed to load audit logs');
+    }
+
+    const rows = (data.data || []).map((log) => {
+      const time = new Date(log.createdAt).toLocaleString();
+      const entity = log.entityType ? `${log.entityType}:${log.entityId || '-'}` : '-';
+      const meta = log.metadata ? JSON.stringify(log.metadata) : '-';
+      return `
+        <tr>
+          <td>${time}</td>
+          <td>${log.actorRole || '-'}</td>
+          <td>${log.action}</td>
+          <td>${entity}</td>
+          <td style="max-width: 320px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${meta}</td>
+        </tr>
+      `;
+    });
+
+    auditLogsEl.innerHTML = rows.length ? rows.join('') : '<tr><td colspan="5">No audit logs</td></tr>';
+  } catch (error) {
+    auditLogsEl.innerHTML = `<tr><td colspan="5">${error.message}</td></tr>`;
+  }
+}
+
+refreshAuditBtn?.addEventListener('click', loadAuditLogs);
 
 // ========== EXPORT ==========
 document.getElementById('exportBtn')?.addEventListener('click', () => {
@@ -633,6 +934,41 @@ document.getElementById('exportBtn')?.addEventListener('click', () => {
 });
 
 // ========== STUDENT REGISTRATION ==========
+const courseConfig = {
+    'B.Tech': { sems: 8, branches: ['CSE'] },
+    'M.Tech': { sems: 4, branches: ['CSE'] },
+    'MCA': { sems: 4, branches: ['None'] },
+    'MBA': { sems: 4, branches: ['THM', 'None'] },
+    'IHM': { sems: 8, branches: ['None'] },
+    'M.Sc': { sems: 4, branches: ['Env', 'None'] }
+};
+
+document.getElementById('regCourse')?.addEventListener('change', (e) => {
+    const config = courseConfig[e.target.value] || { sems: 8, branches: [] };
+    const semCount = config.sems;
+    const yearSelect = document.getElementById('regYear');
+    if (yearSelect) {
+        yearSelect.innerHTML = '<option value="" selected disabled>Select Semester</option>';
+        for (let i = 1; i <= semCount; i++) {
+            const opt = document.createElement('option');
+            opt.value = i;
+            opt.textContent = `Semester ${i}`;
+            yearSelect.appendChild(opt);
+        }
+    }
+
+    const branchSelect = document.getElementById('regBranch');
+    if (branchSelect) {
+        branchSelect.innerHTML = '<option value="" selected disabled>Select Branch</option>';
+        config.branches.forEach(branch => {
+            const opt = document.createElement('option');
+            opt.value = branch;
+            opt.textContent = branch;
+            branchSelect.appendChild(opt);
+        });
+    }
+});
+
 const registerVideo = document.getElementById('registerVideo');
 const registerCanvas = document.getElementById('registerCanvas');
 const regStartBtn = document.getElementById('regStartBtn');
@@ -678,7 +1014,7 @@ regCaptureBtn?.addEventListener('click', async () => {
     const detection = await faceapi
       .detectSingleFace(registerCanvas, new faceapi.TinyFaceDetectorOptions())
       .withFaceLandmarks()
-      .withFaceDescriptors();
+      .withFaceDescriptor();
 
     if (detection) {
       currentRegisterDescriptor = Array.from(detection.descriptor);
@@ -696,10 +1032,12 @@ document.getElementById('submitRegBtn')?.addEventListener('click', async () => {
   const name = document.getElementById('regName').value;
   const roll = document.getElementById('regRoll').value;
   const email = document.getElementById('regEmail').value;
-  const dept = document.getElementById('regDept').value;
-  const sem = document.getElementById('regSem').value;
+  const phone = document.getElementById('regPhone').value;
+  const course = document.getElementById('regCourse').value;
+  const branch = document.getElementById('regBranch').value;
+  const year = document.getElementById('regYear').value;
 
-  if (!name || !roll || !email || !dept || !sem || !currentRegisterDescriptor) {
+  if (!name || !roll || !email || !phone || !course || !branch || !year || !currentRegisterDescriptor) {
     alert('Please fill all fields and capture face');
     return;
   }
@@ -719,8 +1057,12 @@ document.getElementById('submitRegBtn')?.addEventListener('click', async () => {
         name,
         rollNumber: roll,
         email,
-        department: dept,
-        semester: parseInt(sem),
+        phone,
+        course,
+        branch,
+        year: parseInt(year, 10),
+        department: branch,
+        semester: parseInt(year, 10),
         faceDescriptor: currentRegisterDescriptor,
       }),
     });
@@ -733,8 +1075,10 @@ document.getElementById('submitRegBtn')?.addEventListener('click', async () => {
       document.getElementById('regName').value = '';
       document.getElementById('regRoll').value = '';
       document.getElementById('regEmail').value = '';
-      document.getElementById('regDept').value = '';
-      document.getElementById('regSem').value = '';
+      document.getElementById('regPhone').value = '';
+      document.getElementById('regCourse').value = '';
+      document.getElementById('regBranch').value = '';
+      document.getElementById('regYear').value = '';
       currentRegisterDescriptor = null;
       regStatus.textContent = 'Ready to register';
       regCaptureBtn.textContent = 'Capture Face';
@@ -761,12 +1105,40 @@ document.getElementById('saveSettingsBtn')?.addEventListener('click', () => {
 
 document.getElementById('generateReport')?.addEventListener('click', generateAttendanceReport);
 document.getElementById('exportReportBtn')?.addEventListener('click', exportGeneratedReportCsv);
+document.getElementById('reportTodayBtn')?.addEventListener('click', () => setQuickReportRange('today'));
+document.getElementById('reportWeekBtn')?.addEventListener('click', () => setQuickReportRange('week'));
+document.getElementById('reportMonthBtn')?.addEventListener('click', () => setQuickReportRange('month'));
 
 document.getElementById('refreshHealthBtn')?.addEventListener('click', () => {
   healthRetryDelayMs = 5000;
   clearHealthRetryTimer();
   loadSystemHealth();
 });
+
+function setQuickReportRange(range) {
+  const startEl = document.getElementById('reportStart');
+  const endEl = document.getElementById('reportEnd');
+  if (!startEl || !endEl) return;
+
+  const now = new Date();
+  let start = new Date(now);
+  let end = new Date(now);
+
+  if (range === 'today') {
+    // no change
+  } else if (range === 'week') {
+    const day = start.getDay();
+    const diff = (day === 0 ? 6 : day - 1);
+    start.setDate(start.getDate() - diff);
+  } else if (range === 'month') {
+    start = new Date(now.getFullYear(), now.getMonth(), 1);
+    end = new Date(now.getFullYear(), now.getMonth() + 1, 0);
+  }
+
+  startEl.value = start.toISOString().split('T')[0];
+  endEl.value = end.toISOString().split('T')[0];
+  generateAttendanceReport();
+}
 
 document.getElementById('closeEditModalBtn')?.addEventListener('click', closeEditModal);
 document.getElementById('cancelEditBtn')?.addEventListener('click', closeEditModal);
@@ -799,3 +1171,13 @@ loadModels();
 loadCurrentUser();
 loadDashboard();
 setInterval(loadSystemHealth, 30000);
+
+// Export Handlers
+document.getElementById('exportPdfBtn')?.addEventListener('click', async () => {
+  window.open(`${CONFIG.API_URL}/analytics/export/pdf?token=${CONFIG.TOKEN}`, '_blank');
+});
+
+document.getElementById('exportBtn')?.addEventListener('click', async () => {
+    // Override default CSV export with the new analytics one if preferred, or add specific class
+    window.open(`${CONFIG.API_URL}/analytics/export/csv?token=${CONFIG.TOKEN}`, '_blank');
+});

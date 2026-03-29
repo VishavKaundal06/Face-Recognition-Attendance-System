@@ -21,7 +21,7 @@ body {
 /* Sidebar */
 .sidebar {
     width: 250px;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0b4f9c 0%, #0f7bbf 100%);
     color: white;
     display: flex;
     flex-direction: column;
@@ -186,7 +186,7 @@ body {
 
 .stat-card p {
     font-size: 2rem;
-    color: #667eea;
+    color: #0b4f9c;
     font-weight: 700;
 }
 
@@ -201,6 +201,54 @@ body {
     padding: 25px;
     border-radius: 8px;
     box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.calendar-card {
+    overflow: hidden;
+}
+
+.calendar-year {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+    margin-top: 12px;
+}
+
+.calendar-year .month {
+    border: 1px solid #eef0f4;
+    border-radius: 8px;
+    padding: 10px 12px;
+    background: #fafbff;
+}
+
+.calendar-year .month h4 {
+    font-size: 0.95rem;
+    color: #4b4b4b;
+    margin-bottom: 8px;
+    text-align: center;
+}
+
+.calendar-table {
+    width: 100%;
+    border-collapse: collapse;
+    text-align: center;
+    font-size: 0.75rem;
+    color: #3a3a3a;
+}
+
+.calendar-table thead th {
+    font-weight: 600;
+    color: #0b4f9c;
+    padding-bottom: 6px;
+}
+
+.calendar-table td {
+    padding: 4px 0;
+    border-radius: 4px;
+}
+
+.calendar-table td:empty {
+    background: transparent;
 }
 
 .chart-card h3 {
@@ -359,8 +407,8 @@ body {
 
 .input-field:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    border-color: #0b4f9c;
+    box-shadow: 0 0 5px rgba(11, 79, 156, 0.3);
 }
 
 .form-group {
@@ -427,13 +475,13 @@ video, canvas {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #0b4f9c 0%, #0f7bbf 100%);
     color: white;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(11, 79, 156, 0.35);
 }
 
 .btn-secondary {
@@ -477,8 +525,8 @@ video, canvas {
 }
 
 .btn-edit {
-    background: #e8eaf6;
-    color: #3949ab;
+    background: #e6f0fb;
+    color: #0b4f9c;
 }
 
 .btn-delete {

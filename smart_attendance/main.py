@@ -1,11 +1,12 @@
 import cv2
 import time
+import getpass
 from face_recognition_module import FaceRecognitionSystem
 from attendance_system import AttendanceSystem
 from face_registration import FaceRegistration
 
 class SmartAttendanceApp:
-    """Main application for Smart Attendance System"""
+    """Main application for HPTU Attendance System"""
     
     def __init__(self):
         self.face_recognizer = FaceRecognitionSystem()
@@ -13,6 +14,61 @@ class SmartAttendanceApp:
         self.registration = FaceRegistration()
         self.running = False
         self.detection_cooldown = {}  # Prevent multiple detections for same person
+        self.admin_users = {'admin': 'password'}  # Simple hardcoded admin users
+    
+    def admin_login(self):
+        """Admin login or signup"""
+        while True:
+            print("\n" + "="*50)
+            print("HPTU ATTENDANCE SYSTEM - ADMIN ACCESS")
+            print("="*50)
+            print("1. Login")
+            print("2. Signup (create new admin)")
+            print("3. Exit")
+            print("="*50)
+            
+            choice = input("Enter your choice (1-3): ").strip()
+            
+            if choice == '1':
+                return self.login()
+            elif choice == '2':
+                return self.signup()
+            elif choice == '3':
+                print("Exiting...")
+                return False
+            else:
+                print("Invalid choice.")
+    
+    def login(self):
+        """Login with existing credentials"""
+        while True:
+            username = input("Username: ").strip()
+            password = input("Password: ").strip()  # Temporarily using input for testing
+            
+            if username in self.admin_users and self.admin_users[username] == password:
+                print(f"Welcome, {username}!")
+                return True
+            else:
+                print("Invalid credentials. Try again.")
+    
+    def signup(self):
+        """Create new admin account"""
+        while True:
+            username = input("New username: ").strip()
+            if username in self.admin_users:
+                print("Username already exists.")
+                continue
+            
+            password = getpass.getpass("New password: ")
+            confirm_password = getpass.getpass("Confirm password: ")
+            
+            if password != confirm_password:
+                print("Passwords do not match.")
+                continue
+            
+            self.admin_users[username] = password
+            print(f"Admin account '{username}' created successfully!")
+            return True
     
     def run_attendance(self, confidence_threshold=0.6, model='hog'):
         """
@@ -42,7 +98,7 @@ class SmartAttendanceApp:
         face_results = []
         
         print("\n" + "="*50)
-        print("SMART ATTENDANCE SYSTEM - RUNNING")
+        print("HPTU ATTENDANCE SYSTEM - RUNNING")
         print("="*50)
         print("Press 'Q' to quit, 'S' for summary")
         print("="*50 + "\n")
@@ -90,7 +146,7 @@ class SmartAttendanceApp:
             cv2.putText(frame, "Q: Quit | S: Summary", (10, 70),
                        cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 0), 1)
             
-            cv2.imshow("Smart Attendance System", frame)
+            cv2.imshow("HPTU Attendance System", frame)
             
             key = cv2.waitKey(1) & 0xFF
             
@@ -110,7 +166,7 @@ class SmartAttendanceApp:
         """Interactive menu for the application"""
         while True:
             print("\n" + "="*50)
-            print("SMART ATTENDANCE SYSTEM - MENU")
+            print("HPTU ATTENDANCE SYSTEM - MENU")
             print("="*50)
             print("1. Register new face")
             print("2. View registered people")
@@ -137,7 +193,11 @@ class SmartAttendanceApp:
             
             elif choice == '3':
                 conf = input("Confidence threshold (0.0-1.0, default 0.6): ").strip()
-                confidence_threshold = float(conf) if conf else 0.6
+                try:
+                    confidence_threshold = float(conf) if conf else 0.6
+                except ValueError:
+                    print("Invalid number, using default 0.6")
+                    confidence_threshold = 0.6
                 confidence_threshold = max(0.0, min(1.0, confidence_threshold))
                 
                 model = input("Face detection model (hog/cnn, default hog): ").strip().lower()
@@ -173,7 +233,10 @@ def main():
     app = SmartAttendanceApp()
     
     try:
-        app.interactive_menu()
+        if app.admin_login():
+            app.interactive_menu()
+        else:
+            print("Access denied.")
     except KeyboardInterrupt:
         print("\n\nExiting...")
     except Exception as e:

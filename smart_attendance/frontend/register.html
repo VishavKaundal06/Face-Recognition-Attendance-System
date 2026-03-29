@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Registration - HPTU Attendance System</title>
+    <link rel="stylesheet" href="styles.css">
+    <style>
+        .register-container {
+            max-width: 600px;
+            margin: 20px auto;
+            background: var(--surface-color);
+            padding: 30px;
+            border-radius: var(--radius-lg);
+            box-shadow: var(--shadow-md);
+        }
+        .form-group {
+            margin-bottom: 20px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 12px;
+            font-weight: bold;
+            font-size: 1.1rem;
+            color: #1a3b8d;
+        }
+        body.dark-mode .form-group label {
+            color: #cbd5f5;
+        }
+        .input-field {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid var(--border-color);
+            border-radius: var(--radius-md);
+            font-size: 1rem;
+            background: var(--bg-color);
+            color: var(--text-color);
+        }
+        .video-container {
+            position: relative;
+            width: 100%;
+            height: 340px;
+            background: #000;
+            border-radius: var(--radius-md);
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+        video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .status-text {
+            margin-top: 10px;
+            font-weight: 500;
+        }
+        .btn-large {
+            width: 100%;
+            padding: 14px;
+            font-size: 1.1rem;
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>HPTU Attendance System</h1>
+            <p>Student Self-Registration</p>
+            <a href="index.html" class="btn btn-secondary" style="margin-top: 12px; text-decoration: none; display: inline-block;">Back to Home</a>
+        </header>
+
+        <main>
+            <div class="register-container section">
+                <h2>Register Your Details and Face</h2>
+                
+                <div class="form-group">
+                    <label>Personal Details</label>
+                    <input type="text" id="regName" placeholder="Full Name" class="input-field" style="margin-bottom: 10px;">
+                    <input type="text" id="regRoll" placeholder="Roll Number" class="input-field" style="margin-bottom: 10px;">
+                    <input type="email" id="regEmail" placeholder="Email" class="input-field" style="margin-bottom: 10px;">
+                    <input type="tel" id="regPhone" placeholder="Phone Number" class="input-field">
+                </div>
+                
+                <div class="form-group">
+                    <label>Academic Details</label>
+                    <select id="regCourse" class="input-field" style="margin-bottom: 10px;">
+                        <option value="" selected disabled>Select Course</option>
+                        <option value="B.Tech">B.Tech</option>
+                        <option value="M.Tech">M.Tech</option>
+                        <option value="MCA">MCA</option>
+                        <option value="MBA">MBA</option>
+                        <option value="IHM">IHM</option>
+                        <option value="M.Sc">M.Sc</option>
+                    </select>
+                    <select id="regBranch" class="input-field" style="margin-bottom: 10px;">
+                        <option value="" selected disabled>Select Branch</option>
+                    </select>
+                    <select id="regYear" class="input-field">
+                        <option value="" selected disabled>Select Semester</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
+                    <label>Capture Face</label>
+                    <div class="video-container">
+                        <video id="registerVideo" autoplay playsinline></video>
+                        <canvas id="registerCanvas" style="display: none;"></canvas>
+                    </div>
+                    <div class="controls">
+                        <button id="regStartBtn" class="btn btn-primary">Start Camera</button>
+                        <button id="regCaptureBtn" class="btn btn-success" disabled>Capture Face</button>
+                        <button id="regStopBtn" class="btn btn-secondary" disabled>Stop Camera</button>
+                    </div>
+                    <p id="regStatus" class="status-text text-secondary">Ready to start camera</p>
+                </div>
+
+                <button id="submitRegBtn" class="btn btn-primary btn-large">Submit Registration</button>
+            </div>
+        </main>
+
+        <footer>
+            <p>&copy; 2026 HPTU Attendance System. All rights reserved.</p>
+        </footer>
+    </div>
+
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script defer src="register.js"></script>
+</body>
+</html>

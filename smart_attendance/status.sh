@@ -59,7 +59,7 @@ check_pid() {
   fi
 }
 
-echo "Smart Attendance Status"
+echo "HPTU Attendance System Status"
 echo "------------------------"
 check_pid backend
 check_pid frontend

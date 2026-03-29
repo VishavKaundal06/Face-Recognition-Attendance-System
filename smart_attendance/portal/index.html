@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>HPTU Attendance System - Combined View</title>
+  <style>
+    * { box-sizing: border-box; }
+    body {
+      margin: 0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: #f4f7fb;
+      color: #1f2933;
+    }
+    header {
+      background: linear-gradient(135deg, #0b4f9c 0%, #0f7bbf 100%);
+      color: #fff;
+      padding: 24px;
+      text-align: center;
+    }
+    header h1 { margin: 0 0 6px; font-size: 1.8rem; }
+    header p { margin: 0; opacity: 0.9; }
+    main {
+      padding: 24px;
+      display: grid;
+      gap: 20px;
+    }
+    .section-card {
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 12px 30px rgba(15, 23, 42, 0.08);
+      padding: 16px;
+    }
+    .section-card h2 {
+      margin: 0 0 10px;
+      color: #0b4f9c;
+      font-size: 1.2rem;
+    }
+    .section-card p { margin: 0 0 12px; color: #4b5563; }
+    .section-frame {
+      width: 100%;
+      min-height: 520px;
+      border: 1px solid #e2e8f0;
+      border-radius: 10px;
+    }
+    .health-frame {
+      min-height: 140px;
+    }
+    .link-row {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+      margin-top: 8px;
+    }
+    .link-row a {
+      text-decoration: none;
+      padding: 8px 12px;
+      border-radius: 8px;
+      background: #e6f0fb;
+      color: #0b4f9c;
+      font-weight: 600;
+      font-size: 0.9rem;
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>HPTU Attendance System</h1>
+    <p>Combined view of frontend, admin, and backend health</p>
+  </header>
+  <main>
+    <section class="section-card">
+      <h2>1. Student Frontend</h2>
+      <p>Student-facing interface for attendance.</p>
+      <iframe class="section-frame" src="http://localhost:8000" title="Student Frontend"></iframe>
+      <div class="link-row">
+        <a href="http://localhost:8000" target="_blank" rel="noreferrer">Open Frontend in new tab</a>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>2. Admin Panel</h2>
+      <p>Admin dashboard for managing students and attendance.</p>
+      <iframe class="section-frame" src="http://localhost:8001" title="Admin Panel"></iframe>
+      <div class="link-row">
+        <a href="http://localhost:8001" target="_blank" rel="noreferrer">Open Admin in new tab</a>
+      </div>
+    </section>
+
+    <section class="section-card">
+      <h2>3. Backend Health</h2>
+      <p>API status for backend services.</p>
+      <iframe class="section-frame health-frame" src="http://localhost:5050/api/health" title="Backend Health"></iframe>
+      <div class="link-row">
+        <a href="http://localhost:5050/api/health" target="_blank" rel="noreferrer">Open Health JSON</a>
+      </div>
+    </section>
+  </main>
+</body>
+</html>

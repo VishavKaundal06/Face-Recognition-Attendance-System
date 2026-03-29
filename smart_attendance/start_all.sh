@@ -5,6 +5,7 @@ ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 BACKEND_DIR="$ROOT_DIR/backend"
 FRONTEND_DIR="$ROOT_DIR/frontend"
 ADMIN_DIR="$ROOT_DIR/admin"
+PORTAL_DIR="$ROOT_DIR/portal"
 LOG_DIR="$ROOT_DIR/logs"
 PID_DIR="$ROOT_DIR/.pids"
 
@@ -101,6 +102,7 @@ fi
 cleanup_stale_pid_file backend
 cleanup_stale_pid_file frontend
 cleanup_stale_pid_file admin
+cleanup_stale_pid_file portal
 
 if [ "${START_ALL_RESTART:-false}" = "true" ]; then
   echo "Restart mode enabled (START_ALL_RESTART=true). Stopping existing managed services..."
@@ -150,6 +152,13 @@ if is_port_listening 8001; then
   exit 1
 fi
 
+if is_port_listening 8002; then
+  echo "Port 8002 is already in use. Stop existing process or change portal port."
+  echo "Tip: run ./stop_all.sh first, then retry."
+  echo "Tip: run START_ALL_RESTART=true ./start_all.sh to auto-restart managed services."
+  exit 1
+fi
+
 echo "Installing backend dependencies (safe to re-run)..."
 npm --prefix "$BACKEND_DIR" install >/dev/null
 
@@ -168,6 +177,13 @@ python3 -m http.server 8001 --directory "$ADMIN_DIR" > "$LOG_DIR/admin.log" 2>&1
 ADMIN_PID=$!
 echo "$ADMIN_PID" > "$PID_DIR/admin.pid"
 
+if [ -d "$PORTAL_DIR" ]; then
+  echo "Starting portal on http://localhost:8002"
+  python3 -m http.server 8002 --directory "$PORTAL_DIR" > "$LOG_DIR/portal.log" 2>&1 &
+  PORTAL_PID=$!
+  echo "$PORTAL_PID" > "$PID_DIR/portal.pid"
+fi
+
 sleep 2
 
 if ! curl -fsS http://localhost:5050/api/health >/dev/null 2>&1; then
@@ -176,6 +192,7 @@ if ! curl -fsS http://localhost:5050/api/health >/dev/null 2>&1; then
   if [ -f "$PID_DIR/backend.pid" ]; then kill "$(cat "$PID_DIR/backend.pid")" >/dev/null 2>&1 || true; rm -f "$PID_DIR/backend.pid"; fi
   if [ -f "$PID_DIR/frontend.pid" ]; then kill "$(cat "$PID_DIR/frontend.pid")" >/dev/null 2>&1 || true; rm -f "$PID_DIR/frontend.pid"; fi
   if [ -f "$PID_DIR/admin.pid" ]; then kill "$(cat "$PID_DIR/admin.pid")" >/dev/null 2>&1 || true; rm -f "$PID_DIR/admin.pid"; fi
+  if [ -f "$PID_DIR/portal.pid" ]; then kill "$(cat "$PID_DIR/portal.pid")" >/dev/null 2>&1 || true; rm -f "$PID_DIR/portal.pid"; fi
   exit 1
 fi
 
@@ -184,6 +201,9 @@ echo "Services started:"
 echo "- Backend : http://localhost:5050"
 echo "- Frontend: http://localhost:8000"
 echo "- Admin   : http://localhost:8001"
+if [ -f "$PID_DIR/portal.pid" ]; then
+  echo "- Portal  : http://localhost:8002"
+fi
 echo ""
 echo "Health check:"
 curl -sS http://localhost:5050/api/health || true
@@ -193,5 +213,8 @@ echo "Logs:"
 echo "- $LOG_DIR/backend.log"
 echo "- $LOG_DIR/frontend.log"
 echo "- $LOG_DIR/admin.log"
+if [ -f "$PID_DIR/portal.pid" ]; then
+  echo "- $LOG_DIR/portal.log"
+fi
 echo ""
 echo "To stop all: ./stop_all.sh"

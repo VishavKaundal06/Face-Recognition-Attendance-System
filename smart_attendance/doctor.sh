@@ -47,7 +47,7 @@ raise SystemExit(1)
 PY
 }
 
-echo "Smart Attendance Doctor"
+echo "HPTU Attendance System Doctor"
 echo "Project: $ROOT_DIR"
 echo
 

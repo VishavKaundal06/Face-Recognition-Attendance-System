@@ -4,7 +4,7 @@ set -euo pipefail
 ROOT_DIR="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT_DIR"
 
-echo "Smart Attendance Readiness Check"
+echo "HPTU Attendance System Readiness Check"
 echo "================================"
 echo
 

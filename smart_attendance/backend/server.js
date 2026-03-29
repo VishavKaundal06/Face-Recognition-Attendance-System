@@ -12,6 +12,10 @@ const connectDB = require('./config/database');
 const authRoutes = require('./routes/auth');
 const studentRoutes = require('./routes/students');
 const attendanceRoutes = require('./routes/attendance');
+const calendarRoutes = require('./routes/calendar');
+const auditRoutes = require('./routes/audit');
+const analyticsRoutes = require('./routes/analytics');
+
 
 const app = express();
 
@@ -47,6 +51,19 @@ process.on('SIGINT', () => {
 process.on('SIGTERM', () => {
   cleanupPidFile();
   process.exit(0);
+});
+
+// Global error handlers
+process.on('unhandledRejection', (err) => {
+  console.error(`Unhandled Rejection: ${err.message}`);
+  // In production, you might want to gracefully shutdown
+  // server.close(() => process.exit(1));
+});
+
+process.on('uncaughtException', (err) => {
+  console.error(`Uncaught Exception: ${err.message}`);
+  cleanupPidFile();
+  process.exit(1);
 });
 
 mongoose.set('bufferCommands', false);
@@ -93,6 +110,13 @@ app.use(express.urlencoded({ extended: true }));
 app.use('/api/auth', authRoutes);
 app.use('/api/students', studentRoutes);
 app.use('/api/attendance', attendanceRoutes);
+app.use('/api/calendar', calendarRoutes);
+app.use('/api/audit', auditRoutes);
+app.use('/api/analytics', analyticsRoutes);
+
+
+// Serve admin static files
+app.use(express.static(path.join(__dirname, '..', 'admin')));
 
 // Health check
 app.get('/api/health', (req, res) => {
@@ -104,6 +128,7 @@ app.get('/api/health', (req, res) => {
     status: degraded ? 'Backend is running (degraded: mongodb unavailable)' : 'Backend is running',
     mongodb: mongoState,
     degraded,
+    advice: degraded ? 'Please ensure MongoDB is running or check MONGO_URI in .env' : 'System healthy',
   });
 });
 

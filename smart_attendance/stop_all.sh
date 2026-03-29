@@ -54,3 +54,4 @@ stop_pid_file() {
 stop_pid_file "backend" "5050"
 stop_pid_file "frontend" "8000"
 stop_pid_file "admin" "8001"
+stop_pid_file "portal" "8002"

@@ -1,6 +1,6 @@
-# Smart Attendance System - Face Recognition
+# HPTU Attendance System - Face Recognition
 
-A Python-based smart attendance system that uses facial recognition to automatically mark attendance via webcam.
+A Python-based HPTU attendance system that uses facial recognition to automatically mark attendance via webcam.
 
 ## Features
 

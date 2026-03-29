@@ -1,4 +1,4 @@
-# Smart Attendance System - Quick Setup Guide
+# HPTU Attendance System - Quick Setup Guide
 
 ## 🚀 Get Started in 5 Minutes
 

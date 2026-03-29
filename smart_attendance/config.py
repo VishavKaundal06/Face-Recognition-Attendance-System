@@ -1,5 +1,5 @@
 """
-Configuration file for Smart Attendance System
+Configuration file for HPTU Attendance System
 """
 
 # Face Recognition Settings

@@ -1,4 +1,4 @@
-# Smart Attendance API Documentation
+# HPTU Attendance API Documentation
 
 Base URL: `http://localhost:5050/api`
 

@@ -6,9 +6,14 @@
 
 body {
     font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1a3b8d 0%, #102a6c 100%);
     min-height: 100vh;
     padding: 20px;
+}
+
+body.dark-mode {
+    background: #0f172a;
+    color: #e2e8f0;
 }
 
 .container {
@@ -20,11 +25,20 @@ body {
     overflow: hidden;
 }
 
+body.dark-mode .container {
+    background: #111827;
+    box-shadow: 0 10px 40px rgba(0, 0, 0, 0.5);
+}
+
 header {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #1a3b8d 0%, #102a6c 100%);
     color: white;
     padding: 40px 20px;
     text-align: center;
+}
+
+body.dark-mode header {
+    background: linear-gradient(135deg, #1e3c72 0%, #2a5298 100%);
 }
 
 header h1 {
@@ -61,12 +75,12 @@ main {
 }
 
 .tab-btn:hover {
-    color: #667eea;
+    color: #f37321;
 }
 
 .tab-btn.active {
-    color: #667eea;
-    border-bottom-color: #667eea;
+    color: #f37321;
+    border-bottom-color: #f37321;
 }
 
 .tab-content {
@@ -89,10 +103,18 @@ main {
     border-radius: 8px;
 }
 
+body.dark-mode .section {
+    background: #1f2937;
+}
+
 .section h2 {
     color: #333;
     margin-bottom: 20px;
     font-size: 1.8rem;
+}
+
+body.dark-mode .section h2 {
+    color: #e2e8f0;
 }
 
 .video-container {
@@ -131,13 +153,13 @@ video, canvas {
 }
 
 .btn-primary {
-    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    background: linear-gradient(135deg, #f37321 0%, #d45f18 100%);
     color: white;
 }
 
 .btn-primary:hover {
     transform: translateY(-2px);
-    box-shadow: 0 6px 20px rgba(102, 126, 234, 0.4);
+    box-shadow: 0 6px 20px rgba(243, 115, 33, 0.4);
 }
 
 .btn-secondary {
@@ -168,7 +190,13 @@ video, canvas {
     padding: 15px;
     border-radius: 6px;
     margin-bottom: 20px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #f37321;
+}
+
+body.dark-mode .detection-info,
+body.dark-mode .result-box {
+    background: #111827;
+    color: #e2e8f0;
 }
 
 #detectionStatus {
@@ -179,7 +207,7 @@ video, canvas {
 .result-box {
     padding: 20px;
     border-radius: 6px;
-    border-left: 4px solid #667eea;
+    border-left: 4px solid #f37321;
     background: white;
 }
 
@@ -212,7 +240,7 @@ video, canvas {
 }
 
 #studentInfo strong {
-    color: #667eea;
+    color: #f37321;
 }
 
 .settings-group {
@@ -226,6 +254,10 @@ video, canvas {
     font-weight: 600;
 }
 
+body.dark-mode .settings-group label {
+    color: #e2e8f0;
+}
+
 .input-field {
     width: 100%;
     padding: 10px;
@@ -237,8 +269,14 @@ video, canvas {
 
 .input-field:focus {
     outline: none;
-    border-color: #667eea;
-    box-shadow: 0 0 5px rgba(102, 126, 234, 0.3);
+    border-color: #f37321;
+    box-shadow: 0 0 5px rgba(243, 115, 33, 0.3);
+}
+
+body.dark-mode .input-field {
+    background: #374151;
+    color: #f8fafc;
+    border-color: #4b5563;
 }
 
 footer {
@@ -249,12 +287,18 @@ footer {
     border-top: 1px solid #e0e0e0;
 }
 
+body.dark-mode footer {
+    background: #0b1220;
+    color: #cbd5f5;
+    border-top: 1px solid #1f2937;
+}
+
 .loading {
     display: inline-block;
     width: 20px;
     height: 20px;
     border: 3px solid #f3f3f3;
-    border-top: 3px solid #667eea;
+    border-top: 3px solid #f37321;
     border-radius: 50%;
     animation: spin 1s linear infinite;
 }
@@ -262,6 +306,15 @@ footer {
 @keyframes spin {
     0% { transform: rotate(0deg); }
     100% { transform: rotate(360deg); }
+}
+
+@media (max-width: 720px) {
+    body { padding: 10px; }
+    header h1 { font-size: 2rem; }
+    .nav-tabs { flex-wrap: wrap; }
+    .controls { flex-direction: column; }
+    .container { border-radius: 10px; }
+    .section { padding: 18px; }
 }
 
 @media (max-width: 600px) {

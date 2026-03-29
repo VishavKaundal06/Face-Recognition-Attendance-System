@@ -3,14 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Smart Attendance - Student</title>
+    <meta name="description" content="HPTU Face Recognition Attendance System - Mark and view student attendance using facial recognition">
+    <title>HPTU Attendance System - Student</title>
     <link rel="stylesheet" href="styles.css">
+    <link rel="manifest" href="manifest.json">
+    <meta name="theme-color" content="#4a90e2">
+
 </head>
 <body>
     <div class="container">
         <header>
-            <h1>📷 Smart Attendance System</h1>
-            <p>Face Recognition Based Attendance</p>
+            <h1>HPTU Attendance System</h1>
+            <p>Face Recognition Attendance</p>
+            <div style="margin-top: 12px; display: flex; gap: 10px; justify-content: center;">
+                <a href="register.html" class="btn btn-primary" style="text-decoration: none;">Register New Student</a>
+                <button id="toggleTheme" class="btn btn-secondary">Toggle Dark Mode</button>
+            </div>
         </header>
 
         <main>
@@ -84,6 +92,24 @@
                             <option value="false">Disabled</option>
                             <option value="true">Enabled</option>
                         </select>
+
+                        <label for="multiFrameEnabled">Multi-frame Verification:</label>
+                        <select id="multiFrameEnabled" class="input-field">
+                            <option value="true">Enabled</option>
+                            <option value="false">Disabled</option>
+                        </select>
+
+                        <label for="livenessEnabled">Liveness Check (Blink):</label>
+                        <select id="livenessEnabled" class="input-field">
+                            <option value="false">Disabled</option>
+                            <option value="true">Enabled</option>
+                        </select>
+
+                        <label for="locationEnabled">Share Location:</label>
+                        <select id="locationEnabled" class="input-field">
+                            <option value="false">Disabled</option>
+                            <option value="true">Enabled</option>
+                        </select>
                         
                         <button id="saveSettings" class="btn btn-primary">Save Settings</button>
                     </div>
@@ -92,12 +118,12 @@
         </main>
 
         <footer>
-            <p>&copy; 2026 Smart Attendance System. All rights reserved.</p>
+            <p>&copy; 2026 HPTU Attendance System. All rights reserved.</p>
         </footer>
     </div>
 
     <!-- Load face-api models -->
-    <script async defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
-    <script src="app.js"></script>
+    <script defer src="https://cdn.jsdelivr.net/npm/face-api.js@0.22.2/dist/face-api.min.js"></script>
+    <script defer src="app.js"></script>
 </body>
 </html>
