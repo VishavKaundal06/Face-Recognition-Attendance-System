@@ -19,7 +19,7 @@ router.post(
   [
     body('title').trim().notEmpty().withMessage('Title is required'),
     body('date').isISO8601().withMessage('Valid date is required'),
-    body('type').optional().isIn(['holiday', 'leave']).withMessage('Invalid type'),
+    body('type').optional().isIn(['holiday', 'leave']).withMessage('Invalid type')
   ],
   validateRequest,
   calendarController.createHoliday

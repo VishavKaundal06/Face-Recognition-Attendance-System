@@ -29,5 +29,8 @@
     "ready": "./ready.sh",
     "py:setup": "./python_setup.sh",
     "py:start": "./python_start.sh"
+  },
+  "devDependencies": {
+    "eslint": "^10.1.0"
   }
 }

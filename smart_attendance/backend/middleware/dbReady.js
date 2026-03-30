@@ -8,7 +8,7 @@ const requireDatabase = (req, res, next) => {
   return res.status(503).json({
     success: false,
     error: 'Database unavailable',
-    message: 'Service is running in degraded mode. Connect MongoDB to use this endpoint.',
+    message: 'Service is running in degraded mode. Connect MongoDB to use this endpoint.'
   });
 };
 

@@ -54,7 +54,7 @@ async function main() {
 
   try {
     await mongoose.connect(process.env.MONGO_URI, {
-      serverSelectionTimeoutMS: 8000,
+      serverSelectionTimeoutMS: 8000
     });
 
     const existing = await User.findOne({ $or: [{ username }, { email }] });

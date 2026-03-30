@@ -6,7 +6,7 @@ const CONFIG = {
   AUTO_MARK: localStorage.getItem('autoMarkEnabled') === 'true',
   MULTI_FRAME: localStorage.getItem('multiFrameEnabled') !== 'false',
   LIVENESS: localStorage.getItem('livenessEnabled') === 'true',
-  LOCATION: localStorage.getItem('locationEnabled') === 'true',
+  LOCATION: localStorage.getItem('locationEnabled') === 'true'
 };
 
 // DOM Elements
@@ -138,7 +138,7 @@ async function loadModels() {
     await Promise.all([
       faceapi.nets.tinyFaceDetector.loadFromUri(CONFIG.MODEL_URL),
       faceapi.nets.faceLandmark68Net.loadFromUri(CONFIG.MODEL_URL),
-      faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL),
+      faceapi.nets.faceRecognitionNet.loadFromUri(CONFIG.MODEL_URL)
     ]);
     console.log('✓ Models loaded successfully');
     detectionStatus.textContent = '✓ Ready - Click "Start Webcam" to begin';
@@ -153,7 +153,7 @@ async function loadModels() {
 startBtn.addEventListener('click', async () => {
   try {
     stream = await navigator.mediaDevices.getUserMedia({
-      video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+      video: { width: { ideal: 1280 }, height: { ideal: 720 } }
     });
     
     video.srcObject = stream;
@@ -395,8 +395,8 @@ async function markAttendanceFromDetection(detection, { autoMode = false } = {})
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
         faceDescriptor: Array.from(detection.descriptor),
-        threshold: CONFIG.THRESHOLD,
-      }),
+        threshold: CONFIG.THRESHOLD
+      })
     });
 
     const data = await response.json();
@@ -408,14 +408,14 @@ async function markAttendanceFromDetection(detection, { autoMode = false } = {})
         confidence: Math.round(data.confidence * 100),
         photo: canvas.toDataURL('image/jpeg'),
         deviceInfo: { userAgent: navigator.userAgent, platform: navigator.platform },
-        location: await getLocationPayload(),
+        location: await getLocationPayload()
       };
 
       try {
         const attendanceResponse = await fetch(`${CONFIG.API_URL}/attendance/mark`, {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
+          body: JSON.stringify(payload)
         });
 
         const attendanceData = await attendanceResponse.json();
@@ -497,7 +497,7 @@ async function getLocationPayload() {
         resolve({
           latitude: pos.coords.latitude,
           longitude: pos.coords.longitude,
-          accuracy: pos.coords.accuracy,
+          accuracy: pos.coords.accuracy
         });
       },
       () => resolve({}),

@@ -20,7 +20,7 @@ exports.createHoliday = async (req, res) => {
       action: 'holiday.created',
       entityType: 'holiday',
       entityId: holiday._id,
-      metadata: { title, date, type },
+      metadata: { title, date, type }
     });
 
     res.status(201).json({ success: true, data: holiday });
@@ -41,7 +41,7 @@ exports.deleteHoliday = async (req, res) => {
       req,
       action: 'holiday.deleted',
       entityType: 'holiday',
-      entityId: id,
+      entityId: id
     });
 
     res.json({ success: true });

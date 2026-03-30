@@ -4,29 +4,29 @@ const AuditLogSchema = new mongoose.Schema(
   {
     actorId: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'User'
     },
     actorRole: {
       type: String,
-      trim: true,
+      trim: true
     },
     action: {
       type: String,
       required: true,
-      trim: true,
+      trim: true
     },
     entityType: {
       type: String,
-      trim: true,
+      trim: true
     },
     entityId: {
       type: String,
-      trim: true,
+      trim: true
     },
     metadata: {
       type: Object,
-      default: {},
-    },
+      default: {}
+    }
   },
   { timestamps: true }
 );

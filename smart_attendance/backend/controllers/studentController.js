@@ -38,12 +38,12 @@ exports.getAllStudents = async (req, res) => {
     const students = await Student.find({ isActive: true }).select('-faceDescriptor');
     res.json({
       success: true,
-      data: students,
+      data: students
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -55,17 +55,17 @@ exports.getStudentById = async (req, res) => {
     if (!student) {
       return res.status(404).json({
         success: false,
-        error: 'Student not found',
+        error: 'Student not found'
       });
     }
     res.json({
       success: true,
-      data: student,
+      data: student
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -83,7 +83,7 @@ exports.registerStudent = async (req, res) => {
       year,
       department,
       semester,
-      faceDescriptor,
+      faceDescriptor
     } = req.body;
 
     const resolvedBranch = branch || department;
@@ -93,7 +93,7 @@ exports.registerStudent = async (req, res) => {
     if (!resolvedBranch || Number.isNaN(parsedYear) || parsedYear === undefined) {
       return res.status(400).json({
         success: false,
-        error: 'Branch and year are required',
+        error: 'Branch and year are required'
       });
     }
 
@@ -102,7 +102,7 @@ exports.registerStudent = async (req, res) => {
     if (existingStudent) {
       return res.status(400).json({
         success: false,
-        error: 'Student with this roll number already exists',
+        error: 'Student with this roll number already exists'
       });
     }
 
@@ -114,7 +114,7 @@ exports.registerStudent = async (req, res) => {
       course,
       branch: branch || department,
       year: year ?? semester,
-      faceDescriptor: faceDescriptor || [],
+      faceDescriptor: faceDescriptor || []
     });
 
     await student.save();
@@ -124,26 +124,26 @@ exports.registerStudent = async (req, res) => {
       action: 'student.created',
       entityType: 'student',
       entityId: student._id,
-      metadata: { rollNumber: student.rollNumber },
+      metadata: { rollNumber: student.rollNumber }
     });
 
     res.status(201).json({
       success: true,
       data: sanitizeStudent(student),
-      message: 'Student registered successfully',
+      message: 'Student registered successfully'
     });
   } catch (error) {
     if (error && error.code === 11000) {
       const field = Object.keys(error.keyPattern || {})[0] || 'field';
       return res.status(400).json({
         success: false,
-        error: `Duplicate value for ${field}`,
+        error: `Duplicate value for ${field}`
       });
     }
 
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -161,7 +161,7 @@ exports.selfRegisterStudent = async (req, res) => {
       year,
       department,
       semester,
-      faceDescriptor,
+      faceDescriptor
     } = req.body;
 
     const resolvedBranch = branch || department;
@@ -171,7 +171,7 @@ exports.selfRegisterStudent = async (req, res) => {
     if (!resolvedBranch || Number.isNaN(parsedYear) || parsedYear === undefined) {
       return res.status(400).json({
         success: false,
-        error: 'Branch and year are required',
+        error: 'Branch and year are required'
       });
     }
 
@@ -180,7 +180,7 @@ exports.selfRegisterStudent = async (req, res) => {
     if (existingStudent) {
       return res.status(400).json({
         success: false,
-        error: 'Student with this roll number already exists',
+        error: 'Student with this roll number already exists'
       });
     }
 
@@ -192,7 +192,7 @@ exports.selfRegisterStudent = async (req, res) => {
       course,
       branch: branch || department,
       year: year ?? semester,
-      faceDescriptor: faceDescriptor || [],
+      faceDescriptor: faceDescriptor || []
     });
 
     await student.save();
@@ -202,26 +202,26 @@ exports.selfRegisterStudent = async (req, res) => {
       action: 'student.self_registered',
       entityType: 'student',
       entityId: student._id,
-      metadata: { rollNumber: student.rollNumber, selfRegistered: true },
+      metadata: { rollNumber: student.rollNumber, selfRegistered: true }
     });
 
     res.status(201).json({
       success: true,
       data: sanitizeStudent(student),
-      message: 'Student successfully registered',
+      message: 'Student successfully registered'
     });
   } catch (error) {
     if (error && error.code === 11000) {
       const field = Object.keys(error.keyPattern || {})[0] || 'field';
       return res.status(400).json({
         success: false,
-        error: `Duplicate value for ${field}`,
+        error: `Duplicate value for ${field}`
       });
     }
 
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -243,14 +243,14 @@ exports.updateStudent = async (req, res) => {
     if (!student) {
       return res.status(404).json({
         success: false,
-        error: 'Student not found',
+        error: 'Student not found'
       });
     }
 
     res.json({
       success: true,
       data: sanitizeStudent(student),
-      message: 'Student updated successfully',
+      message: 'Student updated successfully'
     });
 
     await logAudit({
@@ -258,20 +258,20 @@ exports.updateStudent = async (req, res) => {
       action: 'student.updated',
       entityType: 'student',
       entityId: student._id,
-      metadata: { rollNumber: student.rollNumber },
+      metadata: { rollNumber: student.rollNumber }
     });
   } catch (error) {
     if (error && error.code === 11000) {
       const field = Object.keys(error.keyPattern || {})[0] || 'field';
       return res.status(400).json({
         success: false,
-        error: `Duplicate value for ${field}`,
+        error: `Duplicate value for ${field}`
       });
     }
 
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -288,13 +288,13 @@ exports.deleteStudent = async (req, res) => {
     if (!student) {
       return res.status(404).json({
         success: false,
-        error: 'Student not found',
+        error: 'Student not found'
       });
     }
 
     res.json({
       success: true,
-      message: 'Student deleted successfully',
+      message: 'Student deleted successfully'
     });
 
     await logAudit({
@@ -302,12 +302,12 @@ exports.deleteStudent = async (req, res) => {
       action: 'student.deleted',
       entityType: 'student',
       entityId: student._id,
-      metadata: { rollNumber: student.rollNumber },
+      metadata: { rollNumber: student.rollNumber }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -318,7 +318,7 @@ exports.importStudents = async (req, res) => {
     if (!req.file || !req.file.buffer) {
       return res.status(400).json({
         success: false,
-        error: 'CSV file is required',
+        error: 'CSV file is required'
       });
     }
 
@@ -328,14 +328,14 @@ exports.importStudents = async (req, res) => {
     if (!rows.length) {
       return res.status(400).json({
         success: false,
-        error: 'No rows found in CSV',
+        error: 'No rows found in CSV'
       });
     }
 
     const results = {
       created: 0,
       skipped: 0,
-      errors: [],
+      errors: []
     };
 
     for (const [index, row] of rows.entries()) {
@@ -351,7 +351,7 @@ exports.importStudents = async (req, res) => {
         results.skipped += 1;
         results.errors.push({
           row: index + 2,
-          error: 'Missing required fields',
+          error: 'Missing required fields'
         });
         continue;
       }
@@ -364,7 +364,7 @@ exports.importStudents = async (req, res) => {
           phone,
           course,
           branch,
-          year: parseInt(year, 10),
+          year: parseInt(year, 10)
         });
         results.created += 1;
       } catch (error) {
@@ -376,26 +376,26 @@ exports.importStudents = async (req, res) => {
         }
         results.errors.push({
           row: index + 2,
-          error: message,
+          error: message
         });
       }
     }
 
     res.json({
       success: true,
-      data: results,
+      data: results
     });
 
     await logAudit({
       req,
       action: 'student.imported',
       entityType: 'student',
-      metadata: results,
+      metadata: results
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -408,20 +408,20 @@ exports.recognizeFace = async (req, res) => {
     if (!faceDescriptor) {
       return res.status(400).json({
         success: false,
-        error: 'Face descriptor is required',
+        error: 'Face descriptor is required'
       });
     }
 
     // Get all students with face descriptors
     const students = await Student.find({
       isActive: true,
-      faceDescriptor: { $exists: true, $ne: [] },
+      faceDescriptor: { $exists: true, $ne: [] }
     }).select('name rollNumber email +faceDescriptor');
 
     if (students.length === 0) {
       return res.status(404).json({
         success: false,
-        error: 'No registered students found',
+        error: 'No registered students found'
       });
     }
 
@@ -450,23 +450,23 @@ exports.recognizeFace = async (req, res) => {
           id: bestMatch._id,
           name: bestMatch.name,
           rollNumber: bestMatch.rollNumber,
-          email: bestMatch.email,
+          email: bestMatch.email
         },
         confidence: 1 - bestDistance,
-        distance: bestDistance,
+        distance: bestDistance
       });
     } else {
       res.json({
         success: true,
         matched: false,
         error: 'No matching face found',
-        bestDistance,
+        bestDistance
       });
     }
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };

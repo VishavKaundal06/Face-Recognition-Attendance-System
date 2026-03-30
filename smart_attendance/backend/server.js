@@ -72,7 +72,7 @@ const stateMap = {
   0: 'disconnected',
   1: 'connected',
   2: 'connecting',
-  3: 'disconnecting',
+  3: 'disconnecting'
 };
 
 // Connect to database
@@ -87,7 +87,7 @@ const apiLimiter = rateLimit({
   windowMs: 15 * 60 * 1000,
   max: 500,
   standardHeaders: true,
-  legacyHeaders: false,
+  legacyHeaders: false
 });
 
 // Middleware
@@ -99,7 +99,7 @@ app.use(
       if (allowedOrigins.includes(origin)) return callback(null, true);
       return callback(new Error('Not allowed by CORS'));
     },
-    credentials: true,
+    credentials: true
   })
 );
 app.use('/api', apiLimiter);
@@ -128,7 +128,7 @@ app.get('/api/health', (req, res) => {
     status: degraded ? 'Backend is running (degraded: mongodb unavailable)' : 'Backend is running',
     mongodb: mongoState,
     degraded,
-    advice: degraded ? 'Please ensure MongoDB is running or check MONGO_URI in .env' : 'System healthy',
+    advice: degraded ? 'Please ensure MongoDB is running or check MONGO_URI in .env' : 'System healthy'
   });
 });
 
@@ -144,8 +144,8 @@ app.get('/api/health/detailed', (req, res) => {
     timestamp: new Date().toISOString(),
     checks: {
       backend: 'ok',
-      mongodb: mongoState,
-    },
+      mongodb: mongoState
+    }
   });
 });
 
@@ -154,7 +154,7 @@ app.use((err, req, res, next) => {
   console.error(err.stack);
   res.status(500).json({
     success: false,
-    error: 'Internal server error',
+    error: 'Internal server error'
   });
 });
 

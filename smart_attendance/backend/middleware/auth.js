@@ -7,7 +7,7 @@ const authenticateToken = (req, res, next) => {
   if (!token) {
     return res.status(401).json({
       success: false,
-      error: 'Access token required',
+      error: 'Access token required'
     });
   }
 
@@ -15,7 +15,7 @@ const authenticateToken = (req, res, next) => {
     if (err) {
       return res.status(403).json({
         success: false,
-        error: 'Invalid or expired token',
+        error: 'Invalid or expired token'
       });
     }
 
@@ -28,14 +28,14 @@ const authorizeRoles = (...roles) => (req, res, next) => {
   if (!req.user || !req.user.role) {
     return res.status(403).json({
       success: false,
-      error: 'Access denied',
+      error: 'Access denied'
     });
   }
 
   if (!roles.includes(req.user.role)) {
     return res.status(403).json({
       success: false,
-      error: 'Insufficient permissions',
+      error: 'Insufficient permissions'
     });
   }
 

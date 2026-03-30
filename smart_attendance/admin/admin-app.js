@@ -1,7 +1,7 @@
 // Admin Configuration
 const CONFIG = {
   API_URL: localStorage.getItem('adminApiUrl') || 'http://localhost:5050/api',
-  TOKEN: localStorage.getItem('adminToken'),
+  TOKEN: localStorage.getItem('adminToken')
 };
 
 if (!CONFIG.TOKEN) {
@@ -150,8 +150,8 @@ async function apiRequest(path, options = {}) {
     ...options,
     headers: {
       Authorization: `Bearer ${CONFIG.TOKEN}`,
-      ...(options.headers || {}),
-    },
+      ...(options.headers || {})
+    }
   });
 
   if (response.status === 401 || response.status === 403) {
@@ -244,7 +244,7 @@ async function importStudentsCsv() {
 
     const response = await apiRequest('/students/import', {
       method: 'POST',
-      body: formData,
+      body: formData
     });
 
     const data = await response.json();
@@ -273,7 +273,7 @@ async function loadModels() {
     await Promise.all([
       faceapi.nets.tinyFaceDetector.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/'),
       faceapi.nets.faceLandmark68Net.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/'),
-      faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/'),
+      faceapi.nets.faceRecognitionNet.loadFromUri('https://cdn.jsdelivr.net/gh/justadudewhohacks/face-api.js@master/weights/')
     ]);
     console.log('✓ Models loaded');
   } catch (error) {
@@ -488,7 +488,7 @@ async function saveEditedStudent() {
     phone: editPhoneEl?.value.trim(),
     course: document.getElementById('editCourse')?.value.trim(),
     branch: editBranchEl?.value.trim(),
-    year: editYearEl?.value ? parseInt(editYearEl.value, 10) : undefined,
+    year: editYearEl?.value ? parseInt(editYearEl.value, 10) : undefined
   };
 
   if (payload.branch) {
@@ -517,9 +517,9 @@ async function saveEditedStudent() {
     const response = await apiRequest(`/students/${id}`, {
       method: 'PUT',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify(payload),
+      body: JSON.stringify(payload)
     });
 
     const data = await response.json();
@@ -539,7 +539,7 @@ async function saveEditedStudent() {
 function deleteStudent(id) {
   if (confirm('Are you sure you want to delete this student?')) {
     apiRequest(`/students/${id}`, {
-      method: 'DELETE',
+      method: 'DELETE'
     })
       .then((res) => res.json())
       .then((data) => {
@@ -772,9 +772,9 @@ async function reviewCorrection(id, status) {
     const response = await apiRequest(`/attendance/corrections/${id}`, {
       method: 'PATCH',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
-      body: JSON.stringify({ status, reviewNote }),
+      body: JSON.stringify({ status, reviewNote })
     });
     const data = await response.json();
     if (!response.ok || !data.success) {
@@ -840,7 +840,7 @@ async function addHoliday() {
     const response = await apiRequest('/calendar/holidays', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ title, date, type, description }),
+      body: JSON.stringify({ title, date, type, description })
     });
     const data = await response.json();
     if (!response.ok || !data.success) {
@@ -979,7 +979,7 @@ const regStatus = document.getElementById('regStatus');
 regStartBtn?.addEventListener('click', async () => {
   try {
     currentRegisterStream = await navigator.mediaDevices.getUserMedia({
-      video: { width: { ideal: 1280 }, height: { ideal: 720 } },
+      video: { width: { ideal: 1280 }, height: { ideal: 720 } }
     });
 
     registerVideo.srcObject = currentRegisterStream;
@@ -1051,7 +1051,7 @@ document.getElementById('submitRegBtn')?.addEventListener('click', async () => {
     const response = await apiRequest('/students/register', {
       method: 'POST',
       headers: {
-        'Content-Type': 'application/json',
+        'Content-Type': 'application/json'
       },
       body: JSON.stringify({
         name,
@@ -1063,8 +1063,8 @@ document.getElementById('submitRegBtn')?.addEventListener('click', async () => {
         year: parseInt(year, 10),
         department: branch,
         semester: parseInt(year, 10),
-        faceDescriptor: currentRegisterDescriptor,
-      }),
+        faceDescriptor: currentRegisterDescriptor
+      })
     });
 
     const data = await response.json();

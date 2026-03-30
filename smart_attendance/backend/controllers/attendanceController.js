@@ -44,7 +44,7 @@ exports.markAttendance = async (req, res) => {
     if (alreadyMarked && activeSlot) {
       return res.status(400).json({
         success: false,
-        error: `Attendance already marked for ${activeSlot.subject} today`,
+        error: `Attendance already marked for ${activeSlot.subject} today`
       });
     }
 
@@ -71,18 +71,18 @@ exports.markAttendance = async (req, res) => {
       action: 'attendance.marked',
       entityType: 'attendance',
       entityId: attendance._id,
-      metadata: { studentId: student._id, status },
+      metadata: { studentId: student._id, status }
     });
 
     res.status(201).json({
       success: true,
       data: attendance,
-      message: 'Attendance marked successfully',
+      message: 'Attendance marked successfully'
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -96,7 +96,7 @@ exports.createCorrectionRequest = async (req, res) => {
     if (!attendance) {
       return res.status(404).json({
         success: false,
-        error: 'Attendance record not found',
+        error: 'Attendance record not found'
       });
     }
 
@@ -104,7 +104,7 @@ exports.createCorrectionRequest = async (req, res) => {
       attendanceId,
       requestedBy: req.user.userId,
       reason,
-      requestedStatus,
+      requestedStatus
     });
 
     await logAudit({
@@ -112,17 +112,17 @@ exports.createCorrectionRequest = async (req, res) => {
       action: 'correction.requested',
       entityType: 'correction',
       entityId: request._id,
-      metadata: { attendanceId, requestedStatus },
+      metadata: { attendanceId, requestedStatus }
     });
 
     res.status(201).json({
       success: true,
-      data: request,
+      data: request
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -141,12 +141,12 @@ exports.listCorrectionRequests = async (req, res) => {
 
     res.json({
       success: true,
-      data: requests,
+      data: requests
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -161,14 +161,14 @@ exports.reviewCorrectionRequest = async (req, res) => {
     if (!request) {
       return res.status(404).json({
         success: false,
-        error: 'Correction request not found',
+        error: 'Correction request not found'
       });
     }
 
     if (request.status !== 'pending') {
       return res.status(400).json({
         success: false,
-        error: 'Request already reviewed',
+        error: 'Request already reviewed'
       });
     }
 
@@ -180,7 +180,7 @@ exports.reviewCorrectionRequest = async (req, res) => {
 
     if (status === 'approved') {
       await Attendance.findByIdAndUpdate(request.attendanceId, {
-        status: request.requestedStatus,
+        status: request.requestedStatus
       });
     }
 
@@ -189,17 +189,17 @@ exports.reviewCorrectionRequest = async (req, res) => {
       action: 'correction.reviewed',
       entityType: 'correction',
       entityId: request._id,
-      metadata: { status },
+      metadata: { status }
     });
 
     res.json({
       success: true,
-      data: request,
+      data: request
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -223,7 +223,7 @@ exports.getRecentAttendance = async (req, res) => {
 
       filter.date = {
         $gte: startDate,
-        $lte: endDate,
+        $lte: endDate
       };
     }
 
@@ -234,12 +234,12 @@ exports.getRecentAttendance = async (req, res) => {
     res.json({
       success: true,
       data: records,
-      count: records.length,
+      count: records.length
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -257,19 +257,19 @@ exports.getAttendanceByDate = async (req, res) => {
     const attendance = await Attendance.find({
       date: {
         $gte: startDate,
-        $lte: endDate,
-      },
+        $lte: endDate
+      }
     }).populate('studentId', 'name rollNumber email');
 
     res.json({
       success: true,
       data: attendance,
-      count: attendance.length,
+      count: attendance.length
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -285,7 +285,7 @@ exports.getStudentAttendance = async (req, res) => {
     if (startDate && endDate) {
       filter.date = {
         $gte: new Date(startDate),
-        $lte: new Date(endDate),
+        $lte: new Date(endDate)
       };
     }
 
@@ -294,12 +294,12 @@ exports.getStudentAttendance = async (req, res) => {
     res.json({
       success: true,
       data: attendance,
-      count: attendance.length,
+      count: attendance.length
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -318,7 +318,7 @@ exports.getAllAttendance = async (req, res) => {
 
       filter.date = {
         $gte: startDate,
-        $lte: endDate,
+        $lte: endDate
       };
     }
 
@@ -338,13 +338,13 @@ exports.getAllAttendance = async (req, res) => {
       pagination: {
         total,
         page: parseInt(page),
-        pages: Math.ceil(total / limit),
-      },
+        pages: Math.ceil(total / limit)
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -358,28 +358,28 @@ exports.getAttendanceStats = async (req, res) => {
     if (startDate && endDate) {
       filter.date = {
         $gte: new Date(startDate),
-        $lte: new Date(endDate),
+        $lte: new Date(endDate)
       };
     }
 
     const totalPresent = await Attendance.countDocuments({
       ...filter,
-      status: 'present',
+      status: 'present'
     });
 
     const totalAbsent = await Attendance.countDocuments({
       ...filter,
-      status: 'absent',
+      status: 'absent'
     });
 
     const totalLate = await Attendance.countDocuments({
       ...filter,
-      status: 'late',
+      status: 'late'
     });
 
     const totalLeave = await Attendance.countDocuments({
       ...filter,
-      status: 'leave',
+      status: 'leave'
     });
 
     const totalRecords = await Attendance.countDocuments(filter);
@@ -395,13 +395,13 @@ exports.getAttendanceStats = async (req, res) => {
         totalAbsent,
         totalLate,
         totalLeave,
-        presentPercentage,
-      },
+        presentPercentage
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -414,7 +414,7 @@ exports.getAttendanceReport = async (req, res) => {
     if (!startDate || !endDate) {
       return res.status(400).json({
         success: false,
-        error: 'startDate and endDate are required',
+        error: 'startDate and endDate are required'
       });
     }
 
@@ -427,8 +427,8 @@ exports.getAttendanceReport = async (req, res) => {
     const filter = {
       date: {
         $gte: rangeStart,
-        $lte: rangeEnd,
-      },
+        $lte: rangeEnd
+      }
     };
 
     const records = await Attendance.find(filter).sort({ date: -1 }).lean();
@@ -457,7 +457,7 @@ exports.getAttendanceReport = async (req, res) => {
           absent: 0,
           late: 0,
           leave: 0,
-          total: 0,
+          total: 0
         });
       }
 
@@ -474,7 +474,7 @@ exports.getAttendanceReport = async (req, res) => {
           absent: 0,
           late: 0,
           leave: 0,
-          total: 0,
+          total: 0
         });
       }
 
@@ -503,16 +503,16 @@ exports.getAttendanceReport = async (req, res) => {
           late: statusCounts.late || 0,
           leave: statusCounts.leave || 0,
           presentPercentage,
-          uniqueStudents: byStudent.length,
+          uniqueStudents: byStudent.length
         },
         byStudent,
-        byDay,
-      },
+        byDay
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };

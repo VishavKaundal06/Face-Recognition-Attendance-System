@@ -9,7 +9,7 @@ const { validateRequest } = require('../middleware/validate');
 
 const upload = multer({
 	storage: multer.memoryStorage(),
-	limits: { fileSize: 5 * 1024 * 1024 },
+	limits: { fileSize: 5 * 1024 * 1024 }
 });
 
 const isValidFaceDescriptor = (value) => {
@@ -52,7 +52,7 @@ router.post(
 								body('faceDescriptor')
 									.optional()
 									.custom((value) => isValidFaceDescriptor(value))
-									.withMessage('Face descriptor must be an array of 128 numeric values'),
+									.withMessage('Face descriptor must be an array of 128 numeric values')
 	],
 	validateRequest,
 	studentController.registerStudent
@@ -74,7 +74,7 @@ router.post(
 		body('faceDescriptor')
 			.optional()
 			.custom((value) => isValidFaceDescriptor(value))
-			.withMessage('Face descriptor must be an array of 128 numeric values'),
+			.withMessage('Face descriptor must be an array of 128 numeric values')
 	],
 	validateRequest,
 	studentController.selfRegisterStudent
@@ -105,7 +105,7 @@ router.put(
 								body('faceDescriptor')
 									.optional()
 									.custom((value) => isValidFaceDescriptor(value))
-									.withMessage('Face descriptor must be an array of 128 numeric values'),
+									.withMessage('Face descriptor must be an array of 128 numeric values')
 	],
 	validateRequest,
 	studentController.updateStudent
@@ -128,7 +128,7 @@ router.post(
 		body('faceDescriptor')
 		  .custom((value) => isValidFaceDescriptor(value))
 		  .withMessage('Face descriptor must be an array of 128 numeric values'),
-		body('threshold').optional().isFloat({ min: 0.3, max: 1 }).withMessage('Threshold must be between 0.3 and 1'),
+		body('threshold').optional().isFloat({ min: 0.3, max: 1 }).withMessage('Threshold must be between 0.3 and 1')
 	],
 	validateRequest,
 	studentController.recognizeFace

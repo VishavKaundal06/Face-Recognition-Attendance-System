@@ -5,35 +5,35 @@ const TimetableSchema = new mongoose.Schema(
     subject: {
       type: String,
       required: true,
-      trim: true,
+      trim: true
     },
     teacher: {
       type: String,
-      required: true,
+      required: true
     },
     dayOfWeek: {
       type: String,
       enum: ['Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday'],
-      required: true,
+      required: true
     },
     startTime: {
       type: String, // format "HH:mm"
-      required: true,
+      required: true
     },
     endTime: {
       type: String, // format "HH:mm"
-      required: true,
+      required: true
     },
     course: {
       type: String,
-      required: true,
+      required: true
     },
     branch: {
       type: String,
-      required: true,
+      required: true
     },
     room: {
-      type: String,
+      type: String
     }
   },
   { timestamps: true }

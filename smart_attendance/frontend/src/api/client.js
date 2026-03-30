@@ -2,7 +2,7 @@ import axios from 'axios';
 
 const API = axios.create({
     baseURL: 'http://localhost:8080',
-    timeout: 15000,
+    timeout: 15000
 });
 
 // ─── Users ────────────────────────────────────────────────────
@@ -10,7 +10,7 @@ export const getUsers = () => API.get('/api/users/').then(r => r.data);
 
 export const registerUser = (formData) =>
     API.post('/api/users/register', formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': 'multipart/form-data' }
     }).then(r => r.data);
 
 export const updateUser = (id, data) =>
@@ -21,7 +21,7 @@ export const deleteUser = (id) =>
 
 export const updateFace = (id, formData) =>
     API.post(`/api/users/${id}/update-face`, formData, {
-        headers: { 'Content-Type': 'multipart/form-data' },
+        headers: { 'Content-Type': 'multipart/form-data' }
     }).then(r => r.data);
 
 // ─── Attendance ───────────────────────────────────────────────

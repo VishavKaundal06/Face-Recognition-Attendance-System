@@ -1,0 +1,8 @@
+node_modules/
+logs/
+data/
+backend/node_modules/
+frontend/node_modules/
+dist/
+*.log
+/.pids

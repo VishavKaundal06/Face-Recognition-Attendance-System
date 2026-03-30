@@ -9,7 +9,7 @@ exports.login = async (req, res) => {
     if (!username || !password) {
       return res.status(400).json({
         success: false,
-        error: 'Username and password are required',
+        error: 'Username and password are required'
       });
     }
 
@@ -18,7 +18,7 @@ exports.login = async (req, res) => {
     if (!user) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid credentials',
+        error: 'Invalid credentials'
       });
     }
 
@@ -27,7 +27,7 @@ exports.login = async (req, res) => {
     if (!isPasswordValid) {
       return res.status(401).json({
         success: false,
-        error: 'Invalid credentials',
+        error: 'Invalid credentials'
       });
     }
 
@@ -45,13 +45,13 @@ exports.login = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role,
-      },
+        role: user.role
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -64,19 +64,19 @@ exports.register = async (req, res) => {
     if (!username || !email || !password) {
       return res.status(400).json({
         success: false,
-        error: 'All fields are required',
+        error: 'All fields are required'
       });
     }
 
     // Check if user exists
     const existingUser = await User.findOne({
-      $or: [{ username }, { email }],
+      $or: [{ username }, { email }]
     });
 
     if (existingUser) {
       return res.status(400).json({
         success: false,
-        error: 'User already exists',
+        error: 'User already exists'
       });
     }
 
@@ -84,7 +84,7 @@ exports.register = async (req, res) => {
       username,
       email,
       password,
-      role,
+      role
     });
 
     await user.save();
@@ -96,13 +96,13 @@ exports.register = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role,
-      },
+        role: user.role
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
@@ -115,7 +115,7 @@ exports.me = async (req, res) => {
     if (!user) {
       return res.status(404).json({
         success: false,
-        error: 'User not found',
+        error: 'User not found'
       });
     }
 
@@ -125,13 +125,13 @@ exports.me = async (req, res) => {
         id: user._id,
         username: user.username,
         email: user.email,
-        role: user.role,
-      },
+        role: user.role
+      }
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };

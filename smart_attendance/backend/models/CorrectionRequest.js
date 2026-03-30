@@ -5,39 +5,39 @@ const CorrectionRequestSchema = new mongoose.Schema(
     attendanceId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Attendance',
-      required: true,
+      required: true
     },
     requestedBy: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'User',
-      required: true,
+      required: true
     },
     reason: {
       type: String,
       required: true,
-      trim: true,
+      trim: true
     },
     requestedStatus: {
       type: String,
       enum: ['present', 'absent', 'late', 'leave'],
-      required: true,
+      required: true
     },
     status: {
       type: String,
       enum: ['pending', 'approved', 'rejected'],
-      default: 'pending',
+      default: 'pending'
     },
     reviewedBy: {
       type: mongoose.Schema.Types.ObjectId,
-      ref: 'User',
+      ref: 'User'
     },
     reviewedAt: {
-      type: Date,
+      type: Date
     },
     reviewNote: {
       type: String,
-      trim: true,
-    },
+      trim: true
+    }
   },
   { timestamps: true }
 );

@@ -5,21 +5,21 @@ const HolidaySchema = new mongoose.Schema(
     title: {
       type: String,
       required: true,
-      trim: true,
+      trim: true
     },
     date: {
       type: Date,
-      required: true,
+      required: true
     },
     type: {
       type: String,
       enum: ['holiday', 'leave'],
-      default: 'holiday',
+      default: 'holiday'
     },
     description: {
       type: String,
-      trim: true,
-    },
+      trim: true
+    }
   },
   { timestamps: true }
 );

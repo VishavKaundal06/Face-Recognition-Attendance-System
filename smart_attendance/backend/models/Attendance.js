@@ -5,65 +5,65 @@ const AttendanceSchema = new mongoose.Schema(
     studentId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Student',
-      required: true,
+      required: true
     },
     studentName: {
       type: String,
-      required: true,
+      required: true
     },
     rollNumber: {
       type: String,
-      required: true,
+      required: true
     },
     date: {
       type: Date,
       required: true,
-      default: Date.now,
+      default: Date.now
     },
     timeIn: {
       type: Date,
       required: true,
-      default: Date.now,
+      default: Date.now
     },
     timeOut: {
       type: Date,
-      required: false,
+      required: false
     },
     status: {
       type: String,
       enum: ['present', 'absent', 'late', 'leave'],
-      default: 'present',
+      default: 'present'
     },
     confidence: {
       type: Number, // Confidence score of face match (0-1)
-      required: false,
+      required: false
     },
     photo: {
       type: String, // Path to captured photo
-      required: false,
+      required: false
     },
     remarks: {
       type: String,
-      required: false,
+      required: false
     },
     subject: {
       type: String,
-      required: false,
+      required: false
     },
     timetableId: {
       type: mongoose.Schema.Types.ObjectId,
       ref: 'Timetable',
-      required: false,
+      required: false
     },
 
     deviceInfo: {
       type: Object,
-      default: {},
+      default: {}
     },
     location: {
       type: Object,
-      default: {},
-    },
+      default: {}
+    }
   },
   { timestamps: true }
 );

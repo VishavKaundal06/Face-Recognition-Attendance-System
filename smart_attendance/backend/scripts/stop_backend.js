@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 const fs = require('fs');
 const path = require('path');
 const { execFileSync } = require('child_process');
@@ -52,7 +52,7 @@ function psCommand(pid) {
   try {
     const out = execFileSync('ps', ['-p', String(pid), '-o', 'command='], {
       encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
+      stdio: ['ignore', 'pipe', 'ignore']
     });
     return out.trim();
   } catch {
@@ -64,7 +64,7 @@ function lsofPidsOnPort(port) {
   try {
     const out = execFileSync('lsof', ['-tiTCP:' + String(port), '-sTCP:LISTEN'], {
       encoding: 'utf8',
-      stdio: ['ignore', 'pipe', 'ignore'],
+      stdio: ['ignore', 'pipe', 'ignore']
     }).trim();
     if (!out) return [];
     return out

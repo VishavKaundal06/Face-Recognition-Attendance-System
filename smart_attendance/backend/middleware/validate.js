@@ -9,8 +9,8 @@ const validateRequest = (req, res, next) => {
       error: 'Validation failed',
       details: errors.array().map((e) => ({
         field: e.path,
-        message: e.msg,
-      })),
+        message: e.msg
+      }))
     });
   }
 

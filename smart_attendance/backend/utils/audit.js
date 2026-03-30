@@ -8,7 +8,7 @@ const logAudit = async ({ req, action, entityType, entityId, metadata = {} }) =>
       action,
       entityType,
       entityId: entityId ? String(entityId) : undefined,
-      metadata,
+      metadata
     });
   } catch (error) {
     console.warn('Audit log failed:', error.message);

@@ -13,57 +13,57 @@ const StudentSchema = new mongoose.Schema(
       required: true,
       trim: true,
       minlength: 2,
-      maxlength: 100,
+      maxlength: 100
     },
     rollNumber: {
       type: String,
       required: true,
       unique: true,
       trim: true,
-      maxlength: 50,
+      maxlength: 50
     },
     email: {
       type: String,
       required: true,
       unique: true,
       lowercase: true,
-      trim: true,
+      trim: true
     },
     phone: {
       type: String,
       required: true,
       trim: true,
-      maxlength: 20,
+      maxlength: 20
     },
     course: {
       type: String,
       required: true,
       trim: true,
-      maxlength: 100,
+      maxlength: 100
     },
     branch: {
       type: String,
       required: true,
       trim: true,
-      maxlength: 100,
+      maxlength: 100
     },
     year: {
       type: Number,
       required: true,
       min: 1,
-      max: 8,
+      max: 8
     },
     department: {
       type: String,
       required: false,
       trim: true,
-      maxlength: 100,
+      maxlength: 100
     },
     semester: {
       type: Number,
       required: false,
       min: 1,
-      max: 12,
+      max: 12
     },
     faceDescriptor: {
       type: [Number], // Array of face encoding values
@@ -75,25 +75,25 @@ const StudentSchema = new mongoose.Schema(
           if (!Array.isArray(value) || value.length === 0) return true;
           return isValidFaceDescriptor(value);
         },
-        message: 'faceDescriptor must be empty or an array of 128 numeric values',
-      },
+        message: 'faceDescriptor must be empty or an array of 128 numeric values'
+      }
     },
     hasFace: {
       type: Boolean,
-      default: false,
+      default: false
     },
     photoPath: {
       type: String,
-      required: false,
+      required: false
     },
     isActive: {
       type: Boolean,
-      default: true,
+      default: true
     },
     registrationDate: {
       type: Date,
-      default: Date.now,
-    },
+      default: Date.now
+    }
   },
   {
     timestamps: true,
@@ -101,14 +101,14 @@ const StudentSchema = new mongoose.Schema(
       transform(doc, ret) {
         delete ret.faceDescriptor;
         return ret;
-      },
+      }
     },
     toObject: {
       transform(doc, ret) {
         delete ret.faceDescriptor;
         return ret;
-      },
-    },
+      }
+    }
   }
 );
 

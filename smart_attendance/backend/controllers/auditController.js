@@ -10,12 +10,12 @@ exports.listAuditLogs = async (req, res) => {
 
     res.json({
       success: true,
-      data: logs,
+      data: logs
     });
   } catch (error) {
     res.status(500).json({
       success: false,
-      error: error.message,
+      error: error.message
     });
   }
 };
